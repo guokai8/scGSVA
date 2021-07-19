@@ -3,48 +3,17 @@
 as.data.frame.Annot<-function(x,...){
   as.data.frame(x@annot)
 }
-##' @method as.data.frame richResult
-##' @export
-as.data.frame.richResult <- function(x, ...) {
-  as.data.frame(x@result, ...)
-}
-##' @method as.data.frame GSEAResult
-##' @export
-as.data.frame.GSEAResult <- function(x, ...) {
-  as.data.frame(x@result, ...)
-}
 ##' @method row.names Annot
 ##' @export
 row.names.Annot<-function(x,...){
   row.names(x@annot)
 }
 
-##' @method row.names richResult
-##' @export
-row.names.richResult <- function(x, ...) {
-  row.names(x@result)
-}
-##' @method row.names GSEAResult
-##' @export
-row.names.GSEAResult <- function(x, ...) {
-  row.names(x@result)
-}
 ##' @method names Annot
 ##' @export
 names.Annot<-function(x,...){
   names(x@annot)
 }
-##' @method names richResult
-##' @export
-names.richResult <- function(x, ...) {
-  names(x@result)
-}
-##' @method names GSEAResult
-##' @export
-names.GSEAResult <- function(x, ...) {
-  names(x@result)
-}
-
 ##' @importFrom utils head
 ##' @method head Annot
 ##' @export
@@ -53,25 +22,6 @@ head.Annot<-function(x,n=6L,...){
   head(x@annot,n,...)
 }
 
-##' @importFrom utils head
-##' @method head richResult
-##' @export
-head.richResult <- function(x, n=6L, ...) {
-  cat("=== Total significant terms is:",dim(x@result),"===\n")
-  head(x@result, n, ...)
-}
-
-##' @method head GSEAResult
-##' @export
-head.GSEAResult <- head.richResult
-
-##' @importFrom utils tail
-##' @method tail richResult
-##' @export
-tail.richResult <- function(x, n=6L, ...) {
-  cat("=== Total significant terms is:",dim(x@result),"===\n")
-  tail(x@result, n, ...)
-}
 ##' @importFrom utils tail
 ##' @method tail Annot
 ##' @export
@@ -80,55 +30,15 @@ tail.Annot<-function(x,n=6L,...){
   tail(x@annot,n,...)
 }
 
-##' @method tail GSEAResult
-##' @export
-tail.GSEAResult <- tail.richResult
-
-##' @method dim richResult
-##' @export
-dim.richResult <- function(x) {
-  dim(x@result)
-}
 ##' @method dim Annot
 ##' @export
 dim.Annot <- function(x) {
   dim(x@annot)
 }
-##' @method dim GSEAResult
-##' @export
-dim.GSEAResult <- dim.richResult
-
-##' @method summary richResult
-##' @export
-summary.richResult<-function(x){
-  cat("Total input genes is: ",length(x@gene)," and significant biological term is: ",nrow(x@result)," \n");
-}
-##' @method summary GSEAResult
-##' @export
-summary.GSEAResult<-function(x){
-  cat("Total significant biological term is: ", table(x@result$padj<0.05)[[2]],"\n");
-}
 ##' @method [ Annot
 ##' @export
 `[.Annot` <- function(x, i, j) {
   x@annot[i,j]
-}
-
-##' @method [ richResult
-##' @export
-`[.richResult` <- function(x, i, j) {
-  x@result[i,j]
-}
-
-##' @method [ GSEAResult
-##' @export
-`[.GSEAResult` <- `[.richResult`
-
-
-##' @method $ richResult
-##' @export
-`$.richResult` <-  function(x, name) {
-  x@result[, name]
 }
 
 ##' @method $ Annot
@@ -137,20 +47,6 @@ summary.GSEAResult<-function(x){
   x@annot[, name]
 }
 
-##' @method $ GSEAResult
-##' @export
-`$.GSEAResult` <- `$.richResult`
-
-##' @method result richResult
-##' @export
-result.richResult<-function(x){
-  as.data.frame(x@result)
-}
-##' @method result GSEAResult
-##' @export
-result.GSEAResult<-function(x){
-  as.data.frame(x@result)
-}
 #' extract the gene information and related pathway
 ##' @method detail richResult
 ##' @param x richResult object
@@ -168,24 +64,7 @@ result.GSEAResult<-function(x){
 detail.richResult<-function(x){
   as.data.frame(x@detail)
 }
-#' extract the gene information and related pathway
-##' @method detail GSEAResult
-##' @param x GSEAResult object
-#' @examples
-#' \dontrun{
-#' hsako<-buildAnnot(species="human",keytype="SYMBOL",anntype = "KEGG")
-#' hsako<-as.data.frame(hsako)
-#' name=sample(unique(hsako$GeneID),1000)
-#' gene<-rnorm(1000)
-#' names(gene)<-name
-#' res<-richGSEA(gene,object = hsako)
-#' head(detail(res))
-#' }
-#' @author Kai Guo
-##' @export
-detail.GSEAResult<-function(x){
-  as.data.frame(x@detail)
-}
+
 ##' get detail and integrate with the input gene information
 ##' @importFrom dplyr left_join
 #' @param rese richResult or GSEAResult
@@ -237,7 +116,8 @@ getdetail<-function(rese,resd,sep){
 .get_go_dat<-function(ont="BP"){
   require(GO.db)
   key<-keys(GO.db)
-  suppressMessages(go_dat<-AnnotationDbi::select(GO.db, keys=key, columns=c("TERM","ONTOLOGY"),keytype="GOID"))
+  suppressMessages(go_dat<-AnnotationDbi::select(GO.db, keys=key,
+                          columns=c("TERM","ONTOLOGY"),keytype="GOID"))
   if(ont=="BP") res<-as.data.frame(subset(go_dat,ONTOLOGY=="BP"))
   if(ont=="CC") res<-as.data.frame(subset(go_dat,ONTOLOGY=="CC"))
   if(ont=="MF") res<-as.data.frame(subset(go_dat,ONTOLOGY=="MF"))
@@ -565,59 +445,7 @@ setAs(from = "data.frame", to = "Annot", def = function(from){
   )
 })
 
-##'
-##'
-setAs(from = "data.frame", to = "richResult", def = function(from){
-  keytype <- character()
-  organism <- character()
-  ontology <- character()
-  pvalueCutoff <- numeric()
-  pAdjustMethod <-character()
-  padjCutoff <- numeric()
-  Annot <- from$Annot
-  Term <- from$Term
-  Annotated <- from$Annotated
-  Significant <- from$Significant
-  Pvalue <- from$Pvalue
-  Padj <- from$Padj
-  GeneID <- as.vector(from$GeneID)
-  gene<-unique(unlist(strsplit(GeneID,",")))
-  genenumber <- length(gene)
-  resultFis <- data.frame(Annot, Term, Annotated, Significant, Pvalue, Padj, GeneID)
-  rownames(resultFis) <- Annotated
-  new("richResult",
-      result=resultFis,
-      detail=detail,
-      pvalueCutoff   = pvalue,
-      pAdjustMethod  = padj.method,
-      padjCutoff   = padj,
-      genenumber    = length(input),
-      organism       = organism,
-      ontology       = ontology,
-      gene           = input,
-      keytype        = keytype
-  )
-})
 
-#' rbind generic function for richResult object
-#'@importFrom S4Vectors bindROWS
-#'@export
-#'@author Kai Guo
-rbind.richResult<-function(...){
-    objects <- list(...)
-    objects <- lapply(objects,as.data.frame)
-    bindROWS(objects[[1L]],objects=objects[-1L])
-}
-
-#' rbind generic function for GSEAResult object
-#'@importFrom S4Vectors bindROWS
-#'@export
-#'@author Kai Guo
-rbind.GSEAResult<-function(...){
-  objects <- list(...)
-  objects <- lapply(objects,as.data.frame)
-  bindROWS(objects[[1L]],objects=objects[-1L])
-}
 #' replace the term string with newlines
 .paste.char<-function(x){
   return(gsub("([^ ]+ [^ ]+ [^ ]+ [^ ]+) ", "\\1\n", x))
@@ -628,50 +456,15 @@ rbind.GSEAResult<-function(...){
 }
 
 ##'
-setAs(from = "richResult", to = "data.frame", def = function(from){
-  result <- as.data.frame(from@result)
+setAs(from = "GSVA", to = "data.frame", def = function(from){
+  result <- as.data.frame(from@gsva)
   result
 })
-##'
-setAs(from = "GSEAResult", to = "data.frame", def = function(from){
-  result <- as.data.frame(from@result)
-  result
-})
-
 ##'
 setAs(from = "Annot", to = "data.frame", def = function(from){
   result <- as.data.frame(from@annot)
   result
 })
-
-##' kappa function
-.kappa<-function(x,y,geneall){
-  x<-unlist(strsplit(x,","))
-  y<-unlist(strsplit(y,","))
-  if(length(intersect(x,y))==0){
-    kab=0
-  }else{
-    tmp<-matrix(0,2,2)
-    tmp[1,1]<-length(intersect(x,y))
-    tmp[2,1]<-length(setdiff(x,y))
-    tmp[1,2]<-length(setdiff(y,x))
-    tmp[2,2]<-length(setdiff(geneall,union(x,y)))
-    oab<-(tmp[1,1]+tmp[2,2])/sum(tmp)
-    aab<-((tmp[1,1]+tmp[2,1])*(tmp[1,1]+tmp[1,2])+(tmp[1,2]+tmp[2,2])*(tmp[2,1]+tmp[2,2]))/(sum(tmp)*sum(tmp))
-    if(aab==1){
-      kab=0
-    }else{
-      kab<-(oab-aab)/(1-aab)
-    }
-  }
-  return(kab)
-}
-##' calculate enrichment score
-.calculate_Enrichment_Score<-function(x,df){
-  pvalue <- df[x,"Pvalue"]
-  esp = ifelse(pvalue==0,16,-log10(pvalue))
-  es = sum(esp);
-}
 
 ##' merge term
 .merge_term<-function(x,overlap){
@@ -693,4 +486,20 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
   }
   return(res)
 }
-
+.is_inst <- function(pkg) {
+  nzchar(system.file(package = pkg))
+}
+.load_pkg<-function(dbanme){
+  if (!.is_inst(dbname)){
+    if(!.is_inst("BiocManager")){
+      install.packages("BiocManager")
+    }else{
+      BiocManager::install(dbname,update = FALSE)
+    }
+    suppressMessages(require(dbname, character.only = TRUE,quietly = TRUE))
+  }else{
+    suppressMessages(require(dbname, character.only = TRUE,quietly = TRUE))
+  }
+  dbname<-eval(parse(text=dbname))
+  return(dbname)
+}

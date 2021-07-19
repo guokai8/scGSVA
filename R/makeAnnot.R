@@ -9,11 +9,13 @@
 ##' @param OP BP,CC,MF default use all
 ##' @examples
 ##' \dontrun{
-##' annot<-buildAnnot(species="human",keytype="ENTREZID",anntype="GO",bulitin=TRUE)
+##' annot<-buildAnnot(species="human",keytype="SYMBOL",
+##'                   anntype="GO")
 ##' }
 ##' @export
 ##' @author Kai Guo
-buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",builtin=TRUE,OP=NULL){
+buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",
+                     builtin=TRUE,OP=NULL){
   if(anntype=="GO"){
      annot <- .makeGOdata(species=species,keytype=keytype,OP=OP)
   }
@@ -43,17 +45,10 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",builtin=TRUE,
 #' @author Kai Guo
 .makeGOdata<-function(species="human",keytype="ENTREZID",OP=NULL){
   dbname<-.getdbname(species);
-  if (!require(dbname,character.only=TRUE)){
-    if(!require("BiocManager",character.only=TRUE)){
-      install.packages("BiocManager")
-    }else{
-      BiocManager::install(dbname)
-    }
-  }else{
-    suppressMessages(requireNamespace(dbname,character.only = T,quietly = T))
-  }
+  .load_pkg(dbname)
   dbname<-eval(parse(text=dbname))
-  GO_FILE<-AnnotationDbi::select(dbname,keys=keys(dbname,keytype=keytype),keytype=keytype,columns=c("GOALL","ONTOLOGYALL"))
+  GO_FILE<-AnnotationDbi::select(dbname,keys=keys(dbname,keytype=keytype),
+                          keytype=keytype,columns=c("GOALL","ONTOLOGYALL"))
   colnames(GO_FILE)[1]<-"GeneID"
   GO_FILE<-distinct_(GO_FILE,~GeneID, ~GOALL, ~ONTOLOGYALL)
   annot <- getann("GO")
@@ -72,19 +67,10 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",builtin=TRUE,
 .makeKOdata<-function(species="human",keytype="ENTREZID",builtin=TRUE){
   dbname<-.getdbname(species=species);
   if(builtin==TRUE){
-    # suppressMessages(require(AnnotationDbi))
-    #  sel<-AnnotationDbi::select
-    if (!require(dbname,character.only=TRUE)){
-      if(!require("BiocManager",character.only=TRUE)){
-        install.packages("BiocManager")
-      }else{
-        BiocManager::install(dbname)
-      }
-    }else{
-      suppressMessages(requireNamespace(dbname))
-    }
+    .load_pkg(dbname)
     dbname<-eval(parse(text=dbname))
-    KO_FILE=AnnotationDbi::select(dbname,keys=keys(dbname,keytype=keytype),keytype=keytype,columns="PATH")
+    KO_FILE=AnnotationDbi::select(dbname,keys=keys(dbname,keytype=keytype),
+                                  keytype=keytype,columns="PATH")
     KO_FILE<-na.omit(KO_FILE)
   }else{
     spe=.getspeices(species)
@@ -93,7 +79,8 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",builtin=TRUE,
     names(tmp)<-sub('.*:','',names(tmp))
     tmp<-vec_to_df(tmp,name=c(keytype,"PATH"))
     if(keytype!="ENTREZID"){
-      tmp[,1]<-idconvert(species,keys=tmp[,1],fkeytype = "ENTREZID",tkeytype = keytype)
+      tmp[,1]<-idconvert(species,keys=tmp[,1],
+                         fkeytype = "ENTREZID",tkeytype = keytype)
       tmp<-na.omit(tmp)
     }
     KO_FILE=tmp
@@ -228,27 +215,22 @@ buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO",
 #' @author Kai Guo
 .makeROdata<-function(species="human",keytype="SYMBOL"){
   dbname<-.getrodbname(species=species);
-  if (!require("reactome.db",character.only=TRUE)){
-    if(!require("BiocManager",character.only=TRUE)){
-      install.packages("BiocManager")
-    }else{
-      BiocManager::install("reactome.db")
-    }
-  }else{
-    suppressMessages(require("reactome.db",character.only = T,quietly = T))
-  }
+  .load_pkg("reactome.db")
   dbname=sapply(strsplit(dbname,"_"),'[[',1)
   lhs<-as.list(reactomePATHNAME2ID)
   lhs<-lhs[grep(dbname,names(lhs))]
   roid<-as.list(reactomePATHID2EXTID)[unique(as.vector(unlist(lhs)))]
   roid<-lapply(roid, function(x)unique(x))
-  roid<-data.frame("GeneID"=unlist(roid),"Term"=rep(names(roid),times=lapply(roid, length)),row.names=NULL)
+  roid<-data.frame("GeneID"=unlist(roid),"Term"=rep(names(roid),
+                    times=lapply(roid, length)),row.names=NULL)
   ll<-lapply(lhs,function(x)unique(x))
-  roan<-data.frame("Term"=unlist(ll),"Annot"=rep(names(ll),times=lapply(ll,length)),row.names=NULL)
+  roan<-data.frame("Term"=unlist(ll),"Annot"=rep(names(ll),
+                    times=lapply(ll,length)),row.names=NULL)
   roan$Annot<-sub('.*@ ','',sub(':','@',roan$Annot))
   res<-left_join(roid,roan,by=c("Term"="Term"))
   if(keytype!="ENTREZID"){
-    keys = idconvert(species = species,keys = res$GeneID,fkeytype = "ENTREZID",tkeytype = keytype)
+    keys = idconvert(species = species,keys = res$GeneID,
+                     fkeytype = "ENTREZID",tkeytype = keytype)
     res$GeneID = keys
     res <- na.omit(res)
   }
@@ -269,7 +251,8 @@ buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO",
     names(tmp)<-sub('.*:','',names(tmp))
     tmp<-vec_to_df(tmp,name=c(keytype,"Module"))
     if(keytype!="ENTREZID"){
-      tmp[,1]<-idconvert(species,keys=tmp[,1],fkeytype = "ENTREZID",tkeytype = keytype)
+      tmp[,1]<-idconvert(species,keys=tmp[,1],
+                         fkeytype = "ENTREZID",tkeytype = keytype)
       tmp<-na.omit(tmp)
     }
     MO_FILE=tmp
