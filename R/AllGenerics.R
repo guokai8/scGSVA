@@ -1,34 +1,3 @@
-##' richGO
-##'
-##' @name richGO
-##' @rdname richGO-methods
-##' @title richGO method
-#' @param x vector contains gene names or dataframe with DEGs information
-#' @param godata GO annotation data
-#' @param ontology BP,MF or CC
-#' @param pvalue cutoff pvalue
-#' @param padj cutoff p adjust value
-#' @param organism organism
-#' @param keytype keytype for input genes
-#' @param minSize minimal number of genes included in significant terms
-#' @param maxSize maximum number of genes included in significant terms
-#' @param keepRich keep terms with rich factor value equal 1 or not (default: TRUE)
-#' @param filename output filename
-#' @param padj.method pvalue adjust method(default:"BH")
-#' @param sep character string used to separate the genes when concatenating
-##' @return richResult
-##' @examples
-#' \dontrun{
-#' hsago<-buildAnnot(species="human",keytype="SYMBOL",anntype = "GO")
-#' hsago<-as.data.frame(hsago)
-#' gene=sample(unique(hsago$GeneID),1000)
-#' res<-richGO(gene,godata = hsago,ontology ="BP")
-#' }
-##' @export
-##' @author Kai Guo
-setGeneric("richGO", function(x,godata,ontology="BP",pvalue=0.05,padj=NULL,organism=NULL,keytype=NULL,minSize=2,maxSize=500,
-                              keepRich=TRUE,filename=NULL,padj.method="BH",sep=",",...)
-  standardGeneric("richGO"))
 
 ##' richKEGG
 ##'
