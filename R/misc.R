@@ -489,7 +489,7 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
 .is_inst <- function(pkg) {
   nzchar(system.file(package = pkg))
 }
-.load_pkg<-function(dbanme){
+.load_pkg<-function(dbname){
   if (!.is_inst(dbname)){
     if(!.is_inst("BiocManager")){
       install.packages("BiocManager")

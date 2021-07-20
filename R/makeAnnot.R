@@ -63,6 +63,7 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",
 #' @importFrom KEGGREST keggLink
 #' @param species you can check the support species by using showData()
 #' @param keytype the gene ID type
+#' @param bulitin use default database(TRUE or FALSE)
 #' @author Kai Guo
 .makeKOdata<-function(species="human",keytype="ENTREZID",builtin=TRUE){
   dbname<-.getdbname(species=species);
@@ -102,7 +103,7 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",
 ##' @importFrom magrittr %>%
 ##' @param species the species for query
 ##' @param keytype the gene ID type
-##' @param anntype gene set anntype (GO,BP,CC,MF,KEGG,REACTOME,BIOCARTA)
+##' @param anntype anntotaion type of  gene set (GO,BP,CC,MF,KEGG,REACTOME,BIOCARTA)
 ##' @examples
 ##' \dontrun{
 ##' hsamsi<-buildMSIGDB(species="human",keytype="SYMBOL",anntype="GO")
