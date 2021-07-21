@@ -21,7 +21,7 @@ Imports:
     KEGGREST,
     Matrix,
     AnnotationDbi,
-    viridis
+    viridis,
     testthat
 Encoding: UTF-8
 LazyData: true
