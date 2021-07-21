@@ -503,10 +503,6 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
   dbname<-eval(parse(text=dbname))
   return(dbname)
 }
-#' @import ggplot2 theme_classic
-.theme<-function(size){
-  theme_classic(base_size = size)
-}
 #'
 distcolor<-c("#66A61E","#1B9E77","#E7298A","#7570B3","#E6AB02","#A6761D",
              "#D95F02",

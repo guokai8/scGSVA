@@ -7,8 +7,8 @@
 #' @importFrom GSVA gsva
 #' @importFrom SingleCellExperiment counts
 #' @importFrom SingleCellExperiment logcounts
-#' @importFrom SingleCellExperiment assays
-#' @importFrom SingleCellExperiment colSums
+#' @importFrom SummarizedExperiment assays
+#' @importFrom Matrix colSums
 #' @importFrom Seurat as.Seurat
 #' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix summary
@@ -78,7 +78,7 @@ scgsva <- function(obj, annot = NULL, cores = 4,
     out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
                                    ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
                                    BPPARAM = SerialParam(progressbar=verbose)))
-    output <- data.frame(out)
+    output <- data.frame(t(out),check.names = F)
     return(output)
 }
 
