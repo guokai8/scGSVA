@@ -5,7 +5,7 @@
 #' @importFrom dplyr group_by summarize
 #' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
-#' @importFrom ggplot2 scale_color_gradient aes
+#' @importFrom ggplot2 scale_color_gradient aes theme_classic
 #' @importFrom Seurat Embeddings
 #' @importFrom tidyr gather
 #' @importFrom viridis scale_color_viridis
@@ -87,12 +87,19 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
             p <- p + facet_grid(as.formula(paste('.~',group_by)))
         }
     }
-    p <- p + .theme(size=basesize) + labs(color="NES")
+    p <- p + theme_classic(base_size=basesize) + labs(color="NES")
     p
 }
 
 #' @title VlnPlot for the pathways
 #' @description Draws a violin plot of single cell data (KEGG, GO)
+#' @importFrom viridis scale_color_viridis
+#' @importFrom dplyr group_by summarize
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 scale_fill_manual aes theme_classic
+#' @importFrom tidyr gather
+#' @importFrom viridis scale_color_viridis
 #' @param object A GSVA objectect or data.frame
 #' @param features A vector of features to plot
 #' @param color Colors to use for identity class plotting
@@ -136,7 +143,7 @@ vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
         p <- ggplot(gsva,aes_string(x="group",y=features,fill="group"))
     }
     p <- p +geom_violin()
-    p <- p + .theme(size=basesize) + scale_fill_manual(values=color)+
+    p <- p + theme_classic(base_size=basesize)+ scale_fill_manual(values=color)+
          theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))+
         guides(fill = FALSE)+xlab("")
     if(length(features) > 1){
@@ -157,7 +164,7 @@ vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr group_by summarize
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string theme_classic
 #' @importFrom ggplot2 scale_color_gradient aes theme element_text
 #' @importFrom tidyr gather
 #' @importFrom viridis scale_color_viridis
@@ -217,7 +224,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
     if(!is.null(split.by)){
         p <- p + facet_grid(as.formula(paste("facet", '~.')))
     }
-    p <- p + xlab("") + ylab("") +.theme(size = basesize) +
+    p <- p + xlab("") + ylab("") + theme_classic(base_size=basesize)+
         labs(color = "Average NES")+
         theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))
     p
@@ -228,7 +235,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' enrichment across groups with a ridge plot.
 #' @importFrom ggridges geom_density_ridges geom_density_ridges2 position_points_jitter
 #' @importFrom tidyr gather
-#' @importFrom ggplot2 ggplot aes_string scale_fill_manual facet_grid
+#' @importFrom ggplot2 ggplot aes_string scale_fill_manual facet_grid theme_classic
 #' @importFrom ggplot2 ylab xlab guides labs
 #' @param object A GSVA objectect or data.frame
 #' @param features A vector of features to plot
@@ -278,7 +285,7 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL, facet = NUL
     }else{
         p <- p + geom_density_ridges2(alpha = 0.7)
     }
-    p <- p + .theme(size=basesize) + scale_fill_manual(values=color)+
+    p <- p + theme_classic(base_size=basesize) + scale_fill_manual(values=color)+
         ylab(group) +
         guides(fill = FALSE)
     if(length(features) > 1){
