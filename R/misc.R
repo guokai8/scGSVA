@@ -503,3 +503,22 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
   dbname<-eval(parse(text=dbname))
   return(dbname)
 }
+#' @import ggplot2 theme_classic
+.theme<-function(size){
+  theme_classic(base_size = size)
+}
+#'
+distcolor<-c("#66A61E","#1B9E77","#E7298A","#7570B3","#E6AB02","#A6761D",
+             "#D95F02",
+             "#0348A6", "#7AC5FF", "#C6FDEC", "#FFB433", "#FF4B20",
+             "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
+             "#A6761D","#D95F02","#66A61E","#1B9E77","#E7298A","#7570B3",
+             "#E6AB02",'#e6194b', '#3cb44b', '#4363d8',
+             '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c',
+             '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8',
+             '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075',
+             '#808080', '#ffffff', '#000000')
+
+
+
+

@@ -1,54 +1,325 @@
 #' @title Visualize 'Pathways or Terms' on a dimensional reduction plot
 #' @description Colors single cells on a dimensional reduction plot according to a
 #' 'pathways' (i.e. KEGG, GO terms)
-#'
+#' @importFrom viridis scale_color_viridis
+#' @importFrom dplyr group_by summarize
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 scale_color_gradient aes
+#' @importFrom Seurat Embeddings
+#' @importFrom tidyr gather
+#' @importFrom viridis scale_color_viridis
+#' @param object A GSVA objectect or data.frame
+#' @param features A vector of features to plot,
+#' @param reduction Which dimensionality reduction to use. default("umap")
+#' @param color Colors to use for identity class plotting
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param label Name of one or more metadata columns to label the cells by
+#' @param dims Dimensions to plot, must be a two-length numeric vector
+#' specifying x- and y-dimensions
+#' @param pt.size Size of the points on the plot
+#' @param pt.shape If NULL, all points are circles (default)
+#' @param basesize base font size, given in pts.
+#' @param label.size Sets the size of the labels
+#' @param label.color Sets the color of the label text
 #' @author Kai Guo
 #' @export
-featurePlot<-function(obj,features,dims,cells,cols,pt.size=0.5,order,repel=TRUE,label = FALSE, label.size = 4){
-    features <- features
-    seu <- obj@obj
+featurePlot<-function(object, features, reduction = "umap", color = NULL,
+                      group_by = NULL, label = NULL,
+                      dims = c(1, 2), pt.size = 1, pt.shape = 19,
+                      basesize = 12,
+                      label.size = 4, label.color="black"){
+    seu <- object@object
+    meta <- seu@meta.data
+    red <- Embeddings(seu,reduction)
+    gsva <- object@gsva[,features,drop=F]
+    gsva <-cbind(red[rownames(gsva),dims],gsva)
+    if(!is.null(label)){
+        df <- data.frame(text = meta[rownames(gsva),label],
+            x = gsva[,1],y=gsva[,2])
+        df <- df %>%
+            group_by(text) %>%
+            summarize(x = median(x), y = median(y))
 
+    }
+    if(!is.null(group_by)){
+        gsva <- cbind(gsva, meta[rownames(gsva),group_by])
+        colnames(gsva)[ncol(gsva)] <- group_by
+    }
+    if(length(features)>1){
+        if(!is.null(group_by)){
+            gsva <- gather(gsva, path, val, -1, -2, -ncol(gsva))
+        }else{
+            gsva <- gather(gsva, path, val, -1, -2)
+        }
+    }
+    p<-ggplot(gsva, aes_string(x = paste(toupper(reduction), dims[1], sep="_"),
+                              y = paste(toupper(reduction), dims[2], sep="_")
+                              ))
+    if(!is.null(label)){
+        p <- p + geom_text_repel(data = df,aes(x = x, y = y, label = text),
+                                 size = label.size, color = label.color)
+    }
+    if(length(features)>1){
+        p <- p + geom_point(aes(color = val), size = pt.size,
+                shape = pt.shape)
+    }else{
+        p <- p + geom_point(aes_string(color = features),
+                size = pt.size, shape = pt.shape)
+    }
+    if(is.null(color)){
+        p <- p + scale_color_viridis()
+    }else{
+        if(length(color)==2){
+            p <- p + scale_color_gradient(low = color[1],high = color[2])
+        }else{
+            p <- p + scale_color_gradient(low = "white",high = color[1])
+        }
+    }
+    if(length(features) > 1){
+        if(!is.null(group_by)){
+            p <- p + facet_grid(as.formula(paste("path",'~',group_by)))
+        }else{
+            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+        }
+    }else{
+        if(!is.null(group_by)){
+            p <- p + facet_grid(as.formula(paste('.~',group_by)))
+        }
+    }
+    p <- p + .theme(size=basesize) + labs(color="NES")
+    p
 }
 
 #' @title VlnPlot for the pathways
 #' @description Draws a violin plot of single cell data (KEGG, GO)
-#'
+#' @param object A GSVA objectect or data.frame
+#' @param features A vector of features to plot
+#' @param color Colors to use for identity class plotting
+#' @param split.by Factor to split the groups by
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param basesize base font size, given in pts.
 #' @author Kai Guo
 #' @export
-vlnPlot<-function(obj,features){
-    features <- features
-    seu <- obj@obj
+vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
+                  color=NULL,basesize=12){
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@object
+        gsva <- object@gsva[, features, drop=F]
+        meta <- seu@meta.data
+         if(is.null(group_by)){
+            group_by = "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+        if(!is.null(split.by)){
+            gsva$facet <- meta[rownames(gsva), split.by]
+        }
+    }else{
+        gsva <- object[, features, drop=F]
+        gsva <- cbind(gsva,group=group_by)
+    }
+    if(is.null(color)){
+        color <- distcolor[seq_len(length(unique(gsva$group)))]
+    }
+    if(length(features)>1){
+        if(!is.null(split.by)){
+            gsva <- gather(gsva, path, val, -group, -facet)
+        }else{
+            gsva <- gather(gsva, path, val, -group)
+        }
+    }else{
+        colnames(gsva)[1] <- "path"
+    }
+    if(length(features) > 1){
+        p <- ggplot(gsva,aes_string(x="group",y="val",fill="group"))
+    }else{
+        p <- ggplot(gsva,aes_string(x="group",y=features,fill="group"))
+    }
+    p <- p +geom_violin()
+    p <- p + .theme(size=basesize) + scale_fill_manual(values=color)+
+         theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))+
+        guides(fill = FALSE)+xlab("")
+    if(length(features) > 1){
+        if(!is.null(split.by)){
+            p <- p + facet_grid(as.formula(paste("facet", '~', "path")))
+        }else{
+            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+        }
+        p <- p + ylab("Normalized Enrichment Score")
+    }else{
+        p <- p + ylab(paste0(features,"(NES)"))
+    }
+    p
 }
 #' @title DotPlot for the specific pathway
 #' @description Intuitive way of visualizing how pathway changes across
 #' different identity classes (clusters).
-#'
+#' @importFrom viridis scale_color_viridis
+#' @importFrom dplyr group_by summarize
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 scale_color_gradient aes theme element_text
+#' @importFrom tidyr gather
+#' @importFrom viridis scale_color_viridis
+#' @param object A GSVA objectect or data.frame
+#' @param features A vector of features to plot
+#' @param color Colors to use for identity class plotting
+#' @param split.by Factor to split the groups by
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param pt.size Size of the points on the plot
+#' @param pt.shape If NULL, all points are circles (default)
+#' @param basesize base font size, given in pt
 #' @author Kai Guo
 #' @export
-dotPlot<-function(obj,features){
-    features <- features
-    seu <- obj@obj
+dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
+                  pt.size = 1, pt.shape = 19,
+                  basesize = 12){
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@object
+        gsva <- object@gsva[, features, drop=F]
+        meta <- seu@meta.data
+        if(is.null(group_by)){
+            group_by = "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+        if(!is.null(split.by)){
+            gsva$facet <- meta[rownames(gsva), split.by]
+        }
+    }else{
+        gsva <- object[, features, drop=F]
+        gsva <- cbind(gsva,group=group_by)
+    }
+    if(length(features)>1){
+        if(!is.null(split.by)){
+            gsva <- gather(gsva, path, val, -group, -facet)
+            gsva <- gsva%>%group_by(path,group,facet)%>%summarise(val=mean(val))
+        }else{
+            gsva <- gather(gsva, path, val, -group)
+            gsva <- gsva%>%group_by(path,group)%>%summarise(val=mean(val))
+        }
+    }else{
+        colnames(gsva)[1] <- "path"
+        gsva <- gsva%>%group_by(group)%>%summarise(val=mean(path))
+        gsva$path <- features
+    }
+    p <- ggplot(gsva,aes_string(x="group",y="path"))
+    p <- p + geom_point(aes(color = val), size = pt.size,
+                            shape = pt.shape)
+    if(is.null(color)){
+        p <- p + scale_color_viridis()
+    }else{
+        if(length(color)==2){
+            p <- p + scale_color_gradient(low = color[1],high = color[2])
+        }else{
+            p <- p + scale_color_gradient(low = "white",high = color[1])
+        }
+    }
+    if(!is.null(split.by)){
+        p <- p + facet_grid(as.formula(paste("facet", '~.')))
+    }
+    p <- p + xlab("") + ylab("") +.theme(size = basesize) +
+        labs(color = "Average NES")+
+        theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))
+    p
+}
+
+#' @title Generate a ridge plot to examine enrichment distributions
+#' @description This function allows to the user to generate the distribution of
+#' enrichment across groups with a ridge plot.
+#' @importFrom ggridges geom_density_ridges geom_density_ridges2 position_points_jitter
+#' @importFrom tidyr gather
+#' @importFrom ggplot2 ggplot aes_string scale_fill_manual facet_grid
+#' @importFrom ggplot2 ylab xlab guides labs
+#' @param object A GSVA objectect or data.frame
+#' @param features A vector of features to plot
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param color Colors to use for identity class plotting
+#' @param facet Factor to split the groups by
+#' @param rug Adds a rug representation or not
+#' @param basesize base font size, given in pt
+#' @author Kai Guo
+#' @export
+ridgePlot<-function(object, features, group_by = NULL, color = NULL, facet = NULL,
+                    rug = TRUE, basesize = 12){
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@object
+        gsva <- object@gsva[, features, drop=F]
+        meta <- seu@meta.data
+        if(is.null(group_by)){
+            group_by = "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+        if(!is.null(split.by)){
+            gsva$facet <- meta[rownames(gsva), split.by]
+        }
+    }else{
+        gsva <- object[, features, drop=F]
+        gsva <- cbind(gsva,group=group_by)
+        group_by <- ""
+    }
+    if(is.null(color)){
+        color <- distcolor[seq_len(length(unique(gsva$group)))]
+    }
+    if(length(features)>1){
+        if(!is.null(facet)){
+            gsva <- gather(gsva, path, val, -group, -facet)
+        }else{
+            gsva <- gather(gsva, path, val, -group)
+        }
+    }else{
+        colnames(gsva)[1] <- "path"
+    }
+    p<-ggplot(gsva, aes_string(x = "val", y = "group", fill = "group"))
+    if(isTRUE(rug)){
+        p <- p + geom_density_ridges(jittered_points = TRUE,
+            position = position_points_jitter(width = 0.02, height = 0),
+            point_shape = '|', point_size = 3, point_alpha = 1, alpha = 0.7)
+
+    }else{
+        p <- p + geom_density_ridges2(alpha = 0.7)
+    }
+    p <- p + .theme(size=basesize) + scale_fill_manual(values=color)+
+        ylab(group) +
+        guides(fill = FALSE)
+    if(length(features) > 1){
+        if(!is.null(facet)){
+            p <- p + facet_grid(as.formula(paste("facet", '~', "path")))
+        }else{
+            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+        }
+        p <- p + xlab("")
+    }else{
+        p <- p + xlab(paste0(features,"(NES)"))
+    }
+    p
 }
 
 
 #' @author Kai Guo
 #' @export
-ridgePlot<-function(obj,features){
-    features <- features
-    seu <- obj@obj
+Heatmap<-function(object,features,group_by=NULL,color=NULL,border_color,
+                  cluster_rows = TRUE,
+                  cluster_cols = TRUE,
+                  show_rownames = T, show_colnames = T, ...){
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@object
+        gsva <- object@gsva[, features, drop=F]
+        meta <- seu@meta.data
+        if(is.null(group_by)){
+            group_by = "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+
+    }else{
+        gsva <- object[, features, drop=F]
+        gsva <- cbind(gsva,group=group_by)
+    }
+
 }
 
 
 #' @author Kai Guo
 #' @export
-Heatmap<-function(obj){
-    features <- features
-    mat <- as.data.framet(obj@gsva)
-}
-
-
-#' @author Kai Guo
-#' @export
-ggnet<-function(obj){
+ggnet<-function(object){
 
 }
