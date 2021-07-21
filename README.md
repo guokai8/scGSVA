@@ -16,7 +16,10 @@ library(scGSVA)
 data(pbmc)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmc,hsko)
-
+vlnPlot(res,features="Wnt signaling pathway")
+dotPlot(res,features="Wnt signaling pathway")
+ridgePlot(res,features="Wnt signaling pathway")
+featurePlot(res,features="Wnt signaling pathway")
 ```   
 ## Note
 The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development.
