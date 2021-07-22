@@ -35,6 +35,41 @@ tail.Annot<-function(x,n=6L,...){
 dim.Annot <- function(x) {
   dim(x@annot)
 }
+##' @method as.data.frame GSVA
+##' @export
+as.data.frame.GSVA<-function(x,...){
+  as.data.frame(x@gsva)
+}
+##' @method row.names GSVA
+##' @export
+row.names.GSVA<-function(x,...){
+  row.names(x@gsva)
+}
+
+##' @method names GSVA
+##' @export
+names.GSVA<-function(x,...){
+  names(x@gsva)
+}
+##' @importFrom utils head
+##' @method head GSVA
+##' @export
+head.GSVA<-function(x,n=6L,...){
+  head(x@gsva,n,...)
+}
+
+##' @importFrom utils tail
+##' @method tail GSVA
+##' @export
+tail.GSVA<-function(x,n=6L,...){
+  tail(x@gsva,n,...)
+}
+
+##' @method dim GSVA
+##' @export
+dim.GSVA <- function(x) {
+  dim(x@gsva)
+}
 ##' @method [ Annot
 ##' @export
 `[.Annot` <- function(x, i, j) {
@@ -45,6 +80,18 @@ dim.Annot <- function(x) {
 ##' @export
 `$.Annot` <-  function(x, name) {
   x@annot[, name]
+}
+
+##' @method [ GSVA
+##' @export
+`[.GSVA` <- function(x, i, j) {
+  x@gsva[i,j]
+}
+
+##' @method $ GSVA
+##' @export
+`$.GSVA` <-  function(x, name) {
+  x@gsva[, name]
 }
 
 #' extract the gene information and related pathway
@@ -503,7 +550,9 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
   dbname<-eval(parse(text=dbname))
   return(dbname)
 }
-#'
+#' distinguish colors for making figures
+#' @author Kai Guo
+#' @export
 distcolor<-c("#66A61E","#1B9E77","#E7298A","#7570B3","#E6AB02","#A6761D",
              "#D95F02",
              "#0348A6", "#7AC5FF", "#C6FDEC", "#FFB433", "#FF4B20",
@@ -515,6 +564,18 @@ distcolor<-c("#66A61E","#1B9E77","#E7298A","#7570B3","#E6AB02","#A6761D",
              '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075',
              '#808080', '#ffffff', '#000000')
 
-
-
+#' light colors for making figures
+#' @author Kai Guo
+#' @export
+lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', '#476D87',
+              '#E95C59', '#E59CC4', '#AB3282', '#23452F', '#BD956A', '#8C549C', '#585658',
+              '#9FA3A8', '#E0D4CA', '#5F3D69', '#C5DEBA', '#58A4C3', '#E4C755', '#F7F398',
+              '#AA9A59', '#E63863', '#E39A35', '#C1E6F3', '#6778AE', '#91D0BE', '#B53E2B',
+              '#712820', '#DCC1DD', '#CCE0F5',  '#CCC9E6', '#625D9E', '#68A180', '#3A6963',
+              '#968175','#e6194b', '#3cb44b', '#ffe119', '#4363d8','#f58231', '#911eb4',
+              '#46f0f0', '#f032e6', '#bcf60c',
+              '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8',
+              '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075',
+              '#808080'
+)
 

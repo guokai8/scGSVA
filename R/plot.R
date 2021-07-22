@@ -105,14 +105,17 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @importFrom viridis scale_color_viridis
 #' @param object A GSVA objectect or data.frame
 #' @param features A vector of features to plot
+#' @param group_by Name of one or more metadata columns to group (color) cells by
 #' @param color Colors to use for identity class plotting
 #' @param split.by Factor to split the groups by
-#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param pt.size Size of the points on the plot
+#' @param pt.shape If NULL, all points are circles (default)
 #' @param basesize base font size, given in pts.
 #' @author Kai Guo
 #' @export
-vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
-                  color=NULL, basesize=12){
+vlnPlot<-function(object, features, group_by = NULL,color = NULL,
+                  split.by = NULL,
+                  pt.size = 0, pt.shape = 19, basesize = 12){
 
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
@@ -145,6 +148,9 @@ vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
         p <- ggplot(gsva,aes_string(x="group",y=features,fill="group"))
     }
     p <- p + geom_violin(trim = F)
+    if(pt.size>0){
+        p <- p + geom_jitter(size = pt.size, shape = pt.shape)
+    }
     p <- p + theme_classic(base_size=basesize)+ scale_fill_manual(values=color)+
         theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))+
         guides(fill = FALSE)+xlab("")
@@ -311,29 +317,98 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL, split.by = 
     p
 }
 
-
+#' Generate heatmap for the enrichment scores
+#' @importFrom pheatmap pheatmap
+#' @importFrom viridis viridis
+#' @param object A GSVA objectect or data.frame
+#' @param features A vector of features to plot
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param color vector of colors used in heatmap.
+#' @param scale character indicating if the values should be centered and
+#' scaled in either the row direction or the column direction, or none.
+#' Corresponding values are "row", "column" and "none"
+#' @param fontsize_row fontsize for rownames (Default: fontsize)
+#' @param fontsize_col fontsize for colnames (Default: fontsize)
+#' @param border_color color of cell borders on heatmap, use NA if
+#' no border should be drawn.
+#' @param annotation_col data frame that specifies the annotations shown on
+#' top side of the heatmap.
+#' @param annotation_colors ist for specifying annotation_row and annotation_col
+#' track colors manually. It is possible to define the colors for only some
+#' of the features.
+#' @param cluster_rows boolean values determining if rows should be clustered
+#' or hclust object,
+#' @param cluster_cols boolean values determining if columns should be clustered
+#' or hclust object.
+#' @param show_rownames boolean specifying if column names are be shown.
+#' @param show_colnames boolean specifying if column names are be shown.
+#' @param ... parameters used in pheatmap
 #' @author Kai Guo
 #' @export
-Heatmap<-function(object,features,group_by=NULL,color=NULL,border_color,
+Heatmap<-function(object, features=NULL, group_by = NULL,
+                  color = NULL,scale = "row", average = FALSE,
+                  fontsize_row = 5,
+                  fontsize_col = 5,
+                  border_color = "grey60",
+                  annotation_col = NA,
+                  annotation_colors = NA,
                   cluster_rows = TRUE,
                   cluster_cols = TRUE,
-                  show_rownames = T, show_colnames = T, ...){
+                  show_rownames = TRUE, show_colnames = TRUE, ...){
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
-        gsva <- object@gsva[, features, drop=F]
+        if(is.null(features)){
+            gsva <- object@gsva
+            features <- colnames(gsva)
+        }else{
+            gsva <- object@gsva[, features, drop = FALSE]
+        }
         meta <- seu@meta.data
         if(is.null(group_by)){
             group_by = "seurat_clusters"
         }
-        gsva$group <- meta[rownames(gsva), group_by]
+        gsva <- cbind(gsva,meta[rownames(gsva), group_by, drop = FALSE])
+        colnames(gsva)[(length(features)+1):ncol(gsva)]<-group_by
 
     }else{
-        gsva <- object[, features, drop=F]
-        gsva <- cbind(gsva,group=group_by)
+        if(is.null(features)){
+            gsva <- object
+            features <- colnames(gsva)
+        }else{
+            gsva <- object[, features, drop = FALSE]
+        }
+        gsva <- cbind(gsva,group_by)
+        colnames(gsva)[(length(features)+1):ncol(gsva)]<-group_by
     }
+    if(is.null(color)){
+        color = viridis(100)
+    }
+    dat <- t(gsva[,seq_len(length(features))])
+    if(is.na(annotation_col)){
+        anncol <- gsva[,group_by, drop = FALSE]
+    }else{
+        anncol <- annotation_col
+    }
+    if(is.na(annotation_colors)){
+        groupl <- apply(gsva[,group_by, drop = FALSE], 2,
+                            function(x)length(unique(x)))
+        len <- sum(groupl)
+        acolors <- c(distcolor,lightcolor)[1:len]
+        names(acolors) <- as.vector(apply(gsva[,group_by,drop = FALSE], 2,
+                                          function(x)unique(x)))
+        anncolors <- split(acolors,rep(names(groupl),times=groupl))
 
+    }else{
+        anncolors <- annotation_colors
+    }
+    pheatmap(dat,scale=scale,color = color,annotation_col = anncol,
+             annotation_colors = anncolors,cluster_rows = cluster_rows,
+             cluster_cols = cluster_cols,
+             fontsize_row = fontsize_row,
+             fontsize_col = fontsize_col,
+             border_color = border_color,
+             show_rownames = show_rownames,show_colnames = show_colnames,...)
 }
-
 
 #' @author Kai Guo
 #' @export
