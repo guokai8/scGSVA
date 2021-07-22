@@ -29,7 +29,7 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
                       dims = c(1, 2), pt.size = 1, pt.shape = 19,
                       basesize = 12,
                       label.size = 4, label.color="black"){
-    seu <- object@object
+    seu <- object@obj
     meta <- seu@meta.data
     red <- Embeddings(seu,reduction)
     gsva <- object@gsva[,features,drop=F]
@@ -111,7 +111,7 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 vlnPlot<-function(object, features, group_by = NULL, split.by = NULL,
                   color=NULL,basesize=12){
     if (inherits(x = object, what = "GSVA")) {
-        seu <- object@object
+        seu <- object@obj
         gsva <- object@gsva[, features, drop=F]
         meta <- seu@meta.data
          if(is.null(group_by)){
@@ -182,7 +182,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
                   pt.size = 1, pt.shape = 19,
                   basesize = 12){
     if (inherits(x = object, what = "GSVA")) {
-        seu <- object@object
+        seu <- object@obj
         gsva <- object@gsva[, features, drop=F]
         meta <- seu@meta.data
         if(is.null(group_by)){
@@ -249,7 +249,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 ridgePlot<-function(object, features, group_by = NULL, color = NULL, facet = NULL,
                     rug = TRUE, basesize = 12){
     if (inherits(x = object, what = "GSVA")) {
-        seu <- object@object
+        seu <- object@obj
         gsva <- object@gsva[, features, drop=F]
         meta <- seu@meta.data
         if(is.null(group_by)){
@@ -309,7 +309,7 @@ Heatmap<-function(object,features,group_by=NULL,color=NULL,border_color,
                   cluster_cols = TRUE,
                   show_rownames = T, show_colnames = T, ...){
     if (inherits(x = object, what = "GSVA")) {
-        seu <- object@object
+        seu <- object@obj
         gsva <- object@gsva[, features, drop=F]
         meta <- seu@meta.data
         if(is.null(group_by)){
