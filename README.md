@@ -20,6 +20,7 @@ vlnPlot(res,features="Wnt signaling pathway")
 dotPlot(res,features="Wnt signaling pathway")
 ridgePlot(res,features="Wnt signaling pathway")
 featurePlot(res,features="Wnt signaling pathway")
+Heatmap(res,group_by="celltype")
 ```   
 ## Note
 The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development.
