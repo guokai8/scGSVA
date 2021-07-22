@@ -293,7 +293,7 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL, split.by = 
         p <- p + geom_density_ridges2(alpha = 0.7)
     }
     p <- p + theme_classic(base_size=basesize) + scale_fill_manual(values=color)+
-        ylab(group) +
+        ylab(group_by) +
         guides(fill = FALSE)
     if(length(features) > 1){
         if(!is.null(split.by)){
