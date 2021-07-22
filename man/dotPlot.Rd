@@ -10,7 +10,7 @@ dotPlot(
   group_by = NULL,
   split.by = NULL,
   color = NULL,
-  pt.size = 1,
+  pt.size = 3,
   pt.shape = 19,
   basesize = 12
 )

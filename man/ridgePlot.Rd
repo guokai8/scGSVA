@@ -9,7 +9,7 @@ ridgePlot(
   features,
   group_by = NULL,
   color = NULL,
-  facet = NULL,
+  split.by = NULL,
   rug = TRUE,
   basesize = 12
 )
@@ -23,11 +23,11 @@ ridgePlot(
 
 \item{color}{Colors to use for identity class plotting}
 
-\item{facet}{Factor to split the groups by}
-
 \item{rug}{Adds a rug representation or not}
 
 \item{basesize}{base font size, given in pt}
+
+\item{facet}{Factor to split the groups by}
 }
 \description{
 This function allows to the user to generate the distribution of
