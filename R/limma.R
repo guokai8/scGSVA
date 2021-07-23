@@ -9,8 +9,7 @@
 #' @export
 #' @author Kai Guo
 #'
-findPathway <- function(object, group = NULL, ref = NULL, pvalue = 0.05,
-                 padj = NULL){
+findPathway <- function(object, group = NULL, ref = NULL){
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
         gsva <- object@gsva
@@ -33,11 +32,7 @@ findPathway <- function(object, group = NULL, ref = NULL, pvalue = 0.05,
     colnames(design) <- levels(group)
     fit <- lmFit(gsva, design)
     fit1 <- eBayes(fit)
-    res=topTable(fit1, adjust = 'BH', coef = 2, number = Inf)
-    res <- subset(res, P.value < pvalue)
-    if(!is.null(padj)){
-        res <- subset(res, adj.P.Val < padj)
-    }
+    res <- topTable(fit1, adjust = 'BH', coef = 2, number = Inf)
     return(res)
 }
 
