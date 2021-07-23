@@ -1,7 +1,7 @@
 Package: scGSVA
 Type: Package
 Title: GSVA for single cell RNA seq analysis
-Version: 0.0.5
+Version: 0.0.6
 Author: Kai Guo
 Maintainer: Kai Guo <guokai8@gmail.com>
 Description: scGSVA provide function to do GSVA analysis for single cell data
@@ -16,6 +16,7 @@ Imports:
     tidyr,
     GSVA,
     Seurat,
+    SeuratObject,
     SingleCellExperiment,
     msigdbr,
     KEGGREST,
