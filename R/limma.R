@@ -18,8 +18,8 @@ findPathway <- function(object, group = NULL, ref = NULL, pvalue = 0.05,
         gsva <- gsva[rownames(gsva)%in%rownames(meta), ]
         if(is.null(group)){
             group = "seurat_clusters"
-            group <- meta[rownames(gsva), group]
         }
+        group <- meta[rownames(gsva), group]
     }else{
         gsva <- object
     }
