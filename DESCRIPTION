@@ -21,6 +21,12 @@ Imports:
     msigdbr,
     KEGGREST,
     Matrix,
+    BiocParallel,
+    SummarizedExperiment,
+    ggrepel,
+    ggridges,
+    limma,
+    pheatmap,
     AnnotationDbi,
     viridis,
     testthat
