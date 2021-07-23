@@ -54,8 +54,10 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
             gsva <- gather(gsva, path, val, -1, -2)
         }
     }
-    p<-ggplot(gsva, aes_string(x = paste(toupper(reduction), dims[1], sep="_"),
-                              y = paste(toupper(reduction), dims[2], sep="_")
+    xlabel <- colnames(red)[dims[1]]
+    ylabel <- colnames(red)[dims[2]]
+    p<-ggplot(gsva, aes_string(x = xlabel,
+                              y = ylabel
                               ))
     if(length(features)>1){
         p <- p + geom_point(aes(color = val), size = pt.size,
@@ -204,20 +206,22 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
             gsva$facet <- meta[rownames(gsva), split.by]
         }
     }else{
-        gsva <- object[, features, drop=F]
-        gsva <- cbind(gsva,group=group_by)
+        gsva <- object[, features, drop = F]
+        gsva <- cbind(gsva,group = group_by)
     }
     if(length(features)>1){
         if(!is.null(split.by)){
             gsva <- gather(gsva, path, val, -group, -facet)
-            gsva <- gsva%>%group_by(path,group,facet)%>%summarise(val=mean(val))
+            gsva <- gsva%>%group_by(path,group,facet)%>%s
+            ummarise(val = mean(val))
         }else{
             gsva <- gather(gsva, path, val, -group)
-            gsva <- gsva%>%group_by(path,group)%>%summarise(val=mean(val))
+            gsva <- gsva%>%group_by(path,group)%>%
+                summarise(val = mean(val))
         }
     }else{
         colnames(gsva)[1] <- "path"
-        gsva <- gsva%>%group_by(group)%>%summarise(val=mean(path))
+        gsva <- gsva%>%group_by(group)%>%summarise(val = mean(path))
         gsva$path <- features
     }
     p <- ggplot(gsva,aes_string(x="group",y="path"))
@@ -251,6 +255,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' @param object A GSVA objectect or data.frame
 #' @param features A vector of features to plot
 #' @param group_by Name of one or more metadata columns to group (color) cells by
+#' or a vector to show the group
 #' @param color Colors to use for identity class plotting
 #' @param facet Factor to split the groups by
 #' @param rug Adds a rug representation or not

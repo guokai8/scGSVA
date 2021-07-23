@@ -1,9 +1,23 @@
 
 #' @title GSVA function for single cell data or data.frame with expression value
 #' @param obj The count matrix, Seurat, or SingleCellExperiment object.
-#' @param annotation annotation object
+#' @param annot annotation object
+#' @param method to employ in the estimation of gene-set enrichment scores per
+#' sample. By default this is set to gsva
+#' @param kcdf Character string denoting the kernel to use during the
+#' non-parametric estimation of the cumulative distribution function of
+#' expression levels across samples when method="gsva".
+#' By default, kcdf="Poisson"
+#' @param abs.ranking Flag used only when mx.diff=TRUE.
+#' @param min.sz Minimum size of the resulting gene sets
+#' @param max.sz Maximum size of the resulting gene sets.
+#' @param mx.diff Offers two approaches to calculate the enrichment
+#' statistic (ES) from the KS random walk statistic.
+#' @param ssgsea.norm Logical, set to TRUE (default) with method="ssgsea"
+#' runs the SSGSEA method
+#' @param useTerm use Term or use id (default: TRUE)
 #' @param cores The number of cores to use for parallelization.
-#'
+#' @param verbose Gives information about each calculation step. Default: FALSE.
 #' @importFrom GSVA gsva
 #' @importFrom SingleCellExperiment counts
 #' @importFrom SingleCellExperiment logcounts
@@ -14,13 +28,15 @@
 #' @importFrom Matrix summary
 #' @author Kai Guo
 #' @export
-scgsva <- function(obj, annot = NULL, cores = 4,
+scgsva <- function(obj, annot = NULL,
                    method="ssgsea",kcdf="Poisson",
                    abs.ranking=FALSE,min.sz=1,
                    max.sz=Inf,
                    mx.diff=TRUE,
                    ssgsea.norm=TRUE,
                    useTerm=TRUE,
+                   replace_empty = TRUE,
+                   cores = 4,
                    verbose=TRUE) {
     tau=switch(method, gsva=1, ssgsea=0.25, NA)
     if(is.null(annot)) {
@@ -57,8 +73,11 @@ scgsva <- function(obj, annot = NULL, cores = 4,
                  min.sz=min.sz,
                  max.sz=max.sz,cores=cores,
                  tau=tau,ssgsea.norm=ssgsea.norm,
+                 replace_empty = replace_empty,
                  verbose=verbose
                  )
+    annot <- annot[annot[,1]%in%rownames(input),]
+    annot <- annot[order(annot[,3]),]
     res<-new("GSVA",
              obj=obj,
              gsva=out,
@@ -73,12 +92,13 @@ scgsva <- function(obj, annot = NULL, cores = 4,
                    mx.diff=TRUE,
                    tau=switch(method, gsva=1, ssgsea=0.25, NA),
                    ssgsea.norm=TRUE,
+                   replace_empty = TRUE,
                    verbose=TRUE){
     input <- input[rowSums(input > 0) != 0, ]
     out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
                                    ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
                                    BPPARAM = SerialParam(progressbar=verbose)))
-    output <- data.frame(t(out),check.names = F)
+    output <- data.frame(t(out),fix.empty.names = replace_empty)
     return(output)
 }
 

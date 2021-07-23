@@ -78,7 +78,7 @@ buildAnnot<-function(species="human",keytype="SYMBOL",anntype="GO",
     tmp<-keggLink("pathway",spe)
     tmp<-substr(tmp,9,13)
     names(tmp)<-sub('.*:','',names(tmp))
-    tmp<-vec_to_df(tmp,name=c(keytype,"PATH"))
+    tmp<-.vec_to_df(tmp,name=c(keytype,"PATH"))
     if(keytype!="ENTREZID"){
       tmp[,1]<-idconvert(species,keys=tmp[,1],
                          fkeytype = "ENTREZID",tkeytype = keytype)
@@ -250,7 +250,7 @@ buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO",
     tmp<-keggLink("module",spe)
     tmp<-substr(tmp,8,13)
     names(tmp)<-sub('.*:','',names(tmp))
-    tmp<-vec_to_df(tmp,name=c(keytype,"Module"))
+    tmp<-.vec_to_df(tmp,name=c(keytype,"Module"))
     if(keytype!="ENTREZID"){
       tmp[,1]<-idconvert(species,keys=tmp[,1],
                          fkeytype = "ENTREZID",tkeytype = keytype)

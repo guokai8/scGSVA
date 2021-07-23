@@ -82,82 +82,43 @@ dim.GSVA <- function(x) {
   x@annot[, name]
 }
 
+##' @method $ Annot
+##' @export
+`$.GSVA` <-  function(x, name) {
+  x@gsva[, name]
+}
+
 ##' @method [ GSVA
 ##' @export
 `[.GSVA` <- function(x, i, j) {
   x@gsva[i,j]
 }
 
+##' @method [ GSVA
+##' @export
+`[<-.GSVA` <- function(x, i, j,..., value) {
+    x@gsva[i,j] <- value
+    return(x)
+}
+
 ##' @method $ GSVA
 ##' @export
-`$.GSVA` <-  function(x, name) {
-  x@gsva[, name]
+`$<-.GSVA` <-  function(x, name,..., value) {
+  x@gsva[,name] <- value
+  return(x)
 }
-
-#' extract the gene information and related pathway
-##' @method detail richResult
-##' @param x richResult object
-#' @examples
-#' \dontrun{
-#'   hsako<-buildAnnot(species="human",keytype="SYMBOL",anntype = "KEGG")
-#'   hsako<-as.data.frame(hsako)
-#'   gene=sample(unique(hsako$GeneID),1000)
-#'   res<-richKEGG(gene,kodata = hsako)
-#'   head(detail(res))
-#' }
-#' @export
-#' @author Kai Guo
+#' @title subset the GSVA object
+##' @method subset GSVA
+##' @param x a GSVA object
 ##' @export
-detail.richResult<-function(x){
-  as.data.frame(x@detail)
+subset.GSVA <-  function(x, ...) {
+ seu <- x@obj
+ slot(object = x, name = "obj") <- subset(seu,...)
+ gsva <- x@gsva[rownames(x@obj@meta.data),]
+ return(new("GSVA",obj = x@obj, gsva = gsva, annot = x@annot))
+ #return(x)
 }
 
-##' get detail and integrate with the input gene information
-##' @importFrom dplyr left_join
-#' @param rese richResult or GSEAResult
-#' @param resd dataframe with input gene as rownames
-#' @param sep character string used to separate the genes when concatenating
-#' @examples
-#' \dontrun{
-#'   hsako<-buildAnnot(species="human",keytype="SYMBOL",anntype = "KEGG")
-#'   hsako<-as.data.frame(hsako)
-#'   gene=sample(unique(hsako$GeneID),1000)
-#'   res<-richKEGG(gene,kodata = hsako)
-#'   gened<-data.frame(lfc=rnorm(length(gene)))
-#'   rownames(gened)<-gene
-#'   head(getdetail(res,gened))
-#' }
-#' @export
-#' @author Kai Guo
-getdetail<-function(rese,resd,sep){
-  if(!is.data.frame(resd)){
-    resd=data.frame(gene=resd)
-  }
-  if(!("gene"%in%colnames(resd))){
-    resd$gene=rownames(resd)
-  }
-  gene<-strsplit(as.vector(rese$GeneID),split=sep)
-  names(gene)<-rese$Annot
-  gened<-data.frame("TERM"=rep(names(gene),times=unlist(lapply(gene,length))),
-                    "Annot"=rep(rese$Term,times=unlist(lapply(gene,length))),
-                    "GeneID"=unlist(gene),row.names=NULL,
-                    "Pvalue"=rep(rese$Pvalue,times=unlist(lapply(gene,length))),
-                    "Padj"=rep(rese$Padj,times=unlist(lapply(gene,length)))
-  )
-  gened$GeneID<-as.character(gened$GeneID)
-  res<-left_join(gened,resd,by=c("GeneID"="gene"))
-  return(res)
-}
-
-.color_scale <- function(c1="pink", c2="red") { #modified from DOSE
-  pal <- colorRampPalette(c(c1, c2))
-  colors <- pal(200)
-  return(colors)
-}
-.getIdx <- function(v, MIN, MAX) { #modified from DOSE
-  intervals <- seq(MIN, MAX, length.out=200)
-  max(which(intervals <= v))
-}
 
 ##' @importFrom AnnotationDbi keys
 .get_go_dat<-function(ont="BP"){
@@ -216,35 +177,6 @@ getann<-function(ontype="GO"){
   return(res)
 }
 
-#' reverse List
-#' @param lhs: list with names
-#' @export
-#' @author Kai Guo
-reverseList<-function(lhs){
-  lhs_n<-rep(names(lhs),times=lapply(lhs,function(x)length(x)))
-  res<-sf(as.data.frame(cbind(lhs_n,unlist(lhs))))
-  return(res)
-}
-#' ovelap
-overlap <- function(x, y) {
-  x <- unlist(x)
-  y <- unlist(y)
-  length(intersect(x, y))/length(unique(c(x,y)))
-}
-
-#' Get all children terms of node
-#' @param  node  input node of GO
-#' @param  ontology ontology term of BP
-#' @author Kai Guo
-GO_child <- function(node = "GO:0008150", ontology = "BP") {
-  #MF = "GO:0003674", node of MF
-  #BP = "GO:0008150", node of BP
-  #CC = "GO:0005575", node of CC
-  if (ontology == "BP") res <- c(node,GOBPOFFSPRING[[node]])
-  if (ontology == "CC") res <- c(node,GOCCOFFSPRING[[node]])
-  if (ontology == "MF") res <- c(node,GOMFOFFSPRING[[node]])
-  return(res[!is.na(res)])
-}
 
 #' Convert ID between ENTREZID to SYMBOL or other type ID based on bioconductor annotation package
 #' @param species: you can check the support species by using showData()
@@ -397,7 +329,7 @@ showData<-function(){
   dbdata
 }
 ##' vector to data.frame
-vec_to_df<-function(x,name){
+.vec_to_df<-function(x,name){
   dd<-data.frame(names(x),x)
   colnames(dd)<-name
   return(dd)
@@ -513,26 +445,7 @@ setAs(from = "Annot", to = "data.frame", def = function(from){
   result
 })
 
-##' merge term
-.merge_term<-function(x,overlap){
-  ml <- x
-  res<-list();
-  for(i in names(ml)){
-    lhs <- setdiff(names(ml),i)
-    for(j in lhs){
-      ov<-intersect(ml[[i]],ml[[j]])
-      un<-union(ml[[i]],ml[[j]])
-      ovl<-length(ov)/length(un)
-      if(ovl > overlap){
-        res[[i]]<-c(i,un)
-        ml <- ml[setdiff(names(ml),j)]
-      }else{
-        res[[i]]<-c(i,ml[[i]])
-      }
-    }
-  }
-  return(res)
-}
+
 .is_inst <- function(pkg) {
   nzchar(system.file(package = pkg))
 }
