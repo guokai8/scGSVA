@@ -23,6 +23,13 @@
 #' @param basesize base font size, given in pts.
 #' @param label.size Sets the size of the labels
 #' @param label.color Sets the color of the label text
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
+#' featurePlot(res,features="Wnt.signaling.pathway")
 #' @author Kai Guo
 #' @export
 featurePlot<-function(object, features, reduction = "umap", color = NULL,
@@ -113,6 +120,13 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
 #' @param basesize base font size, given in pts.
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
+#' vlnPlot(res,features="Wnt.signaling.pathway")
 #' @author Kai Guo
 #' @export
 vlnPlot<-function(object, features, group_by = NULL,color = NULL,
@@ -189,6 +203,13 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
 #' @param basesize base font size, given in pt
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
+#' dotPlot(res,features="Wnt.signaling.pathway")
 #' @author Kai Guo
 #' @export
 dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
@@ -260,6 +281,13 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' @param split.by Factor to split the groups by
 #' @param rug Adds a rug representation or not
 #' @param basesize base font size, given in pt
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
+#' ridgePlot(res,features="Wnt.signaling.pathway")
 #' @author Kai Guo
 #' @export
 ridgePlot<-function(object, features, group_by = NULL, color = NULL,
@@ -349,6 +377,12 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL,
 #' @param show_rownames boolean specifying if column names are be shown.
 #' @param show_colnames boolean specifying if column names are be shown.
 #' @param ... parameters used in pheatmap
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
+#' Heatmap(res,group="groups")
 #' @author Kai Guo
 #' @export
 Heatmap<-function(object, features=NULL, group_by = NULL,
@@ -416,8 +450,3 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
              show_rownames = show_rownames,show_colnames = show_colnames,...)
 }
 
-#' @author Kai Guo
-#' @export
-ggnet<-function(object){
-
-}
