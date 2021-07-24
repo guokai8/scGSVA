@@ -59,7 +59,13 @@ or hclust object.}
 
 \item{show_colnames}{boolean specifying if column names are be shown.}
 
-\item{...}{parameters used in pheatmap}
+\item{...}{parameters used in pheatmap
+set.seed(123)
+library(scGSVA)
+data(pbmc_small)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc_small,hsko)
+Heatmap(res,group="groups")}
 }
 \description{
 Generate heatmap for the enrichment scores

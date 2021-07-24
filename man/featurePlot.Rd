@@ -49,6 +49,14 @@ specifying x- and y-dimensions}
 Colors single cells on a dimensional reduction plot according to a
 'pathways' (i.e. KEGG, GO terms)
 }
+\examples{
+set.seed(123)
+library(scGSVA)
+data(pbmc_small)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc_small,hsko)
+featurePlot(res,features="Wnt.signaling.pathway")
+}
 \author{
 Kai Guo
 }

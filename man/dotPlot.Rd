@@ -36,6 +36,14 @@ dotPlot(
 Intuitive way of visualizing how pathway changes across
 different identity classes (clusters).
 }
+\examples{
+set.seed(123)
+library(scGSVA)
+data(pbmc_small)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc_small,hsko)
+dotPlot(res,features="Wnt.signaling.pathway")
+}
 \author{
 Kai Guo
 }

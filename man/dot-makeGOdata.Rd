@@ -4,7 +4,7 @@
 \alias{.makeGOdata}
 \title{Build GO annotation}
 \usage{
-.makeGOdata(species = "human", keytype = "ENTREZID", OP = NULL)
+.makeGOdata(species = "human", keytype = "SYMBOL", OP = NULL)
 }
 \arguments{
 \item{species}{you can check the support species by using showData()}

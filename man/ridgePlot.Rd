@@ -34,6 +34,14 @@ or a vector to show the group}
 This function allows to the user to generate the distribution of
 enrichment across groups with a ridge plot.
 }
+\examples{
+set.seed(123)
+library(scGSVA)
+data(pbmc_small)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc_small,hsko)
+ridgePlot(res,features="Wnt.signaling.pathway")
+}
 \author{
 Kai Guo
 }
