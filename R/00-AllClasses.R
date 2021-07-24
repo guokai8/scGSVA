@@ -2,7 +2,6 @@
 ##' This class represents the Annotation information
 ##' @name Annot-class
 ##' @aliases Annot-class
-##'   summary, Annot-method
 ##' @docType class
 ##' @slot species the species of the annotation file
 ##' @slot anntype the type of the annotation file
@@ -23,7 +22,6 @@ setClass("Annot",
 ##' This class represents the Annotation information
 ##' @name GSVA-class
 ##' @aliases GSVA-class
-##'   summary, GSVA-method
 ##' @docType class
 ##' @slot species the species of the annotation file
 ##' @slot anntype the type of the annotation file

@@ -110,6 +110,7 @@ dim.GSVA <- function(x) {
 #' @title subset the GSVA object
 ##' @method subset GSVA
 ##' @param x a GSVA object
+##' @param ... arguments used in subset.Seurat
 ##' @export
 subset.GSVA <-  function(x, ...) {
  seu <- x@obj
@@ -123,15 +124,15 @@ subset.GSVA <-  function(x, ...) {
 ##' @importFrom AnnotationDbi keys
 .get_go_dat<-function(ont="BP"){
   require(GO.db)
-  key<-keys(GO.db)
-  suppressMessages(go_dat<-AnnotationDbi::select(GO.db, keys=key,
-                          columns=c("TERM","ONTOLOGY"),keytype="GOID"))
-  if(ont=="BP") res<-as.data.frame(subset(go_dat,ONTOLOGY=="BP"))
-  if(ont=="CC") res<-as.data.frame(subset(go_dat,ONTOLOGY=="CC"))
-  if(ont=="MF") res<-as.data.frame(subset(go_dat,ONTOLOGY=="MF"))
-  rownames(res)<-res[,1]
+  key <- keys(GO.db)
+  suppressMessages(go_dat <- AnnotationDbi::select(GO.db, keys = key,
+                          columns = c("TERM","ONTOLOGY"),keytype = "GOID"))
+  if(ont=="BP") res<-as.data.frame(subset(go_dat, ONTOLOGY == "BP"))
+  if(ont=="CC") res<-as.data.frame(subset(go_dat, ONTOLOGY == "CC"))
+  if(ont=="MF") res<-as.data.frame(subset(go_dat, ONTOLOGY == "MF"))
+  rownames(res) <- res[,1]
   res<-res[, 2, drop = FALSE]
-  colnames(res)<-"annotation"
+  colnames(res) <- "annotation"
   return(res)
 }
 ##' @importFrom KEGGREST keggList
@@ -161,49 +162,50 @@ subset.GSVA <-  function(x, ...) {
 
 ##' build annotaion for kegg
 ##' @param ontype GO or KEGG
-##' @examples
-##' annot = getann("GO")
 ##' @author Kai Guo
-getann<-function(ontype="GO"){
-  if(ontype=="GO"){
-    res<-rbind(.get_go_dat("BP"),.get_go_dat("MF"),.get_go_dat("CC"))
+.getann<-function(ontype="GO"){
+  if(ontype == "GO"){
+    res <- rbind(.get_go_dat("BP"),.get_go_dat("MF"),.get_go_dat("CC"))
   }
-  if(ontype=="KEGG"){
-    res<-.get_kg_dat(builtin=F)
+  if(ontype == "KEGG"){
+    res<-.get_kg_dat(builtin = FALSE)
   }
-  if(ontype=="Module"){
+  if(ontype == "Module"){
     res <-.get_kgm_dat()
   }
   return(res)
 }
 
 
-#' Convert ID between ENTREZID to SYMBOL or other type ID based on bioconductor annotation package
-#' @param species: you can check the support species by using showData()
-#' @param fkeytype: the gene type you want to convert
-#' @param tkeytype: the gene type you want to get
+#' Convert ID between ENTREZID to SYMBOL or other type ID based on bioconductor
+#' annotation package
+#' @title Convert id between different type
+#' @importFrom AnnotationDbi mapIds
+#' @param species species of gene
+#' @param keys input gene id
+#' @param fkeytype input gene id type
+#' @param tkeytype output gene id type
 #' @examples
 #' \dontrun{
-#'   hsako<-buildAnnot(species="human",keytype="SYMBOL",anntype = "KEGG")
-#'   hsako<-as.data.frame(hsako)
-#'   gene=sample(unique(hsako$GeneID),1000)
-#'   id<-idconvert(species="human",fkeytype="SYMBOL",tkeytype="ENTREZID")
+#' hsako<-buildAnnot(species="human",keytype="SYMBOL",anntype = "KEGG")
+#' hsako<-as.data.frame(hsako)
+#' gene=sample(unique(hsako$GeneID),1000)
+#' id<-idconvert(species="human",fkeytype="SYMBOL",tkeytype="ENTREZID")
 #' }
-#' @export
-#' @author Kai Guo
+#' @return vector
 #' @export
 #' @author Kai Guo
 idconvert<-function(species,keys,fkeytype,tkeytype){
-  dbname<-.getdbname(species);
-  suppressMessages(require(dbname,character.only = T))
-  dbname<-eval(parse(text=dbname))
-  unlist(mapIds(dbname,keys=as.vector(keys),
-         column=tkeytype,
-         keytype=fkeytype,
-         multiVals="first"))
+  dbname <- .getdbname(species);
+  suppressMessages(require(dbname, character.only = TRUE))
+  dbname <- eval(parse(text = dbname))
+  unlist(mapIds(dbname, keys = as.vector(keys),
+         column = tkeytype,
+         keytype = fkeytype,
+         multiVals = "first"))
 }
-.getdbname<-function(species="human"){
-  dbname=.getdb(species=species);
+.getdbname<-function(species = "human"){
+  dbname <- .getdb(species = species);
   if(is.null(dbname)){
     cat("You must check if your request database is avaliable by using showData,
         If not you could make your database by using makeOwnGO and makeOwnKO
@@ -212,11 +214,13 @@ idconvert<-function(species,keys,fkeytype,tkeytype){
   }
   return(dbname)
 }
-.getdb<-function(species=species){
-  species=tryCatch(match.arg(species,c("anopheles","arabidopsis","bovine","celegans","canine","fly","zebrafish",
-                                       "ecoli","ecsakai","chicken","human","mouse","rhesus","malaria","chipm","rat",
-                                       "toxoplasma","streptomyces","pig","yeast","xenopus","warm")),
-                   error=function(cond){return("unsupported")})
+.getdb <- function(species = "human"){
+  species <- tryCatch(match.arg(species,c("anopheles", "arabidopsis",
+            "bovine", "celegans", "canine", "fly", "zebrafish",
+            "ecoli", "ecsakai", "chicken", "human", "mouse",
+            "rhesus","malaria","chipm","rat",
+            "toxoplasma", "streptomyces", "pig", "yeast", "xenopus", "warm")),
+            error=function(cond){return("unsupported")})
   if (species == "anopheles") {
     dbname <- "org.Ag.eg.db"
   } else if (species == "arabidopsis") {
@@ -328,10 +332,10 @@ showData<-function(){
   dbdata<-data.frame(dbname=dbname,species=species)
   dbdata
 }
-##' vector to data.frame
-.vec_to_df<-function(x,name){
-  dd<-data.frame(names(x),x)
-  colnames(dd)<-name
+
+.vec_to_df<-function(x, name){
+  dd <- data.frame(names(x), x)
+  colnames(dd) <- name
   return(dd)
 }
 
@@ -396,7 +400,7 @@ msigdbinfo <- function() {
   cat("# Support species:                                             #\n")
   cat(sort(listspe),"\n")
 }
-.getrodbname<-function(species){
+.getrodbname <- function(species){
  # "Schizosaccharomyces pombe","Taeniopygia guttata",,"Mycobacterium tuberculosis"
   spe<-c("Homo sapiens","Dictyostelium discoideum","Plasmodium falciparum",
          "Saccharomyces cerevisiae","Caenorhabditis elegans",
@@ -424,12 +428,10 @@ setAs(from = "data.frame", to = "Annot", def = function(from){
   )
 })
 
-
-#' replace the term string with newlines
 .paste.char<-function(x){
   return(gsub("([^ ]+ [^ ]+ [^ ]+ [^ ]+) ", "\\1\n", x))
 }
-#' remove the newlines
+
 .clean.char<-function(x){
   return(gsub('\\\n',' ',x))
 }

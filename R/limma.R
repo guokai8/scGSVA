@@ -4,8 +4,6 @@
 #' @param group Name of one or more metadata columns to group cells to compare
 #' or a vector if the obj is a data.frame
 #' @param ref reference group
-#' @param pvalue pvalue cut off
-#' @param padj padj cut off
 #' @export
 #' @author Kai Guo
 #'

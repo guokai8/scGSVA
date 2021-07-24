@@ -35,7 +35,6 @@ scgsva <- function(obj, annot = NULL,
                    mx.diff=TRUE,
                    ssgsea.norm=TRUE,
                    useTerm=TRUE,
-                   replace_empty = TRUE,
                    cores = 4,
                    verbose=TRUE) {
     tau=switch(method, gsva=1, ssgsea=0.25, NA)
@@ -73,7 +72,6 @@ scgsva <- function(obj, annot = NULL,
                  min.sz=min.sz,
                  max.sz=max.sz,cores=cores,
                  tau=tau,ssgsea.norm=ssgsea.norm,
-                 replace_empty = replace_empty,
                  verbose=verbose
                  )
     annot <- annot[annot[,1]%in%rownames(input),]
@@ -98,7 +96,7 @@ scgsva <- function(obj, annot = NULL,
     out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
                                    ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
                                    BPPARAM = SerialParam(progressbar=verbose)))
-    output <- data.frame(t(out),fix.empty.names = replace_empty)
+    output <- data.frame(t(out))
     return(output)
 }
 

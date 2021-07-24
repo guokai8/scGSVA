@@ -224,7 +224,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
         gsva <- gsva%>%group_by(group)%>%summarise(val = mean(path))
         gsva$path <- features
     }
-    p <- ggplot(gsva,aes_string(x="group",y="path"))
+    p <- ggplot(gsva,aes_string(x = "group", y = "path"))
     p <- p + geom_point(aes(color = val), size = pt.size,
                             shape = pt.shape)
     if(is.null(color)){
@@ -257,12 +257,13 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' @param group_by Name of one or more metadata columns to group (color) cells by
 #' or a vector to show the group
 #' @param color Colors to use for identity class plotting
-#' @param facet Factor to split the groups by
+#' @param split.by Factor to split the groups by
 #' @param rug Adds a rug representation or not
 #' @param basesize base font size, given in pt
 #' @author Kai Guo
 #' @export
-ridgePlot<-function(object, features, group_by = NULL, color = NULL, split.by = NULL,
+ridgePlot<-function(object, features, group_by = NULL, color = NULL,
+                    split.by = NULL,
                     rug = TRUE, basesize = 12){
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
@@ -351,7 +352,7 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL, split.by = 
 #' @author Kai Guo
 #' @export
 Heatmap<-function(object, features=NULL, group_by = NULL,
-                  color = NULL,scale = "row", average = FALSE,
+                  color = NULL,scale = "row",
                   fontsize_row = 5,
                   fontsize_col = 5,
                   border_color = "grey60",

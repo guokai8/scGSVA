@@ -5,19 +5,20 @@
 #' @rdname genes-methods
 #' @title gene method
 #' @method genes GSVA
-#' @param x GSVA object
+#' @param object GSVA object
 #' @param features A vector of features to extract
 #' @param useTerm use Term or use id (default: TRUE)
 #' @param with.expr extract the expression value or not (default: TRUE)
 #' @return data.frame
 #' @export
 #' @author Kai Guo
-setGeneric("genes", function(object, features,  useTerm = TRUE, ...)
+setGeneric("genes", function(object, features,  useTerm = TRUE,
+                            with.expr = TRUE)
     standardGeneric("genes"))
 
 #' @title gene method
 #' @method genes GSVA
-#' @param x GSVA object
+#' @param object GSVA object
 #' @param features A vector of features to extract
 #' @param useTerm use Term or use id (default: TRUE)
 #' @param with.expr extract the expression value or not (default: TRUE)
