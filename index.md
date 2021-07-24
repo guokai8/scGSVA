@@ -1,37 +1,30 @@
-## Welcome to GitHub Pages
-
-You can use the [editor on GitHub](https://github.com/guokai8/scGSVA/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+# scGSVA
+## GSVA for single cell RNA seq analysis.   
+# scGSVA [![Project Status:](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![](https://img.shields.io/badge/devel%20version-0.0.6-green.svg)](https://github.com/guokai8/scGSVA)  ![Code Size:](https://img.shields.io/github/languages/code-size/guokai8/scGSVA)
+## Description
+_scGSVA_ provides wrap functions to do GSVA analysis for single cell data. And scGSVA includes functions to build annotation for almost all species. scGSVA also provides function to generate figures based on the GSVA results.
+_scGSVA_ provides functions to generate annotation data which can be used in the analysis.
+## Installation
 ```
+library(devtools)
+install_github("guokai8/scGSVA")
+``` 
+## Examples
+```{r}
+set.seed(123)   
+library(scGSVA)   
+data(pbmc)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc,hsko)
+vlnPlot(res,features="Wnt.signaling.pathway")
+dotPlot(res,features="Wnt.signaling.pathway")
+ridgePlot(res,features="Wnt.signaling.pathway")
+featurePlot(res,features="Wnt.signaling.pathway")
+Heatmap(res,group_by="celltype")
+```   
+## Note
+The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+## Contact information
 
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/guokai8/scGSVA/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+For any questions please contact guokai8@gmail.com
