@@ -16,12 +16,32 @@ library(scGSVA)
 data(pbmc_small)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmc_small,hsko)
+```
+```{r}
 vlnPlot(res,features="Wnt.signaling.pathway")
+```
+<img align="center" src = 'vln.jpg'  width=300 height=300>
+
+```{r}
 dotPlot(res,features="Wnt.signaling.pathway")
+```
+<img align="center" src = 'dot.png'  width=300 height=300>
+
+```{r}
 ridgePlot(res,features="Wnt.signaling.pathway")
+```
+<img align="center" src = 'ridge.jpg'  width=300 height=300>
+
+```{r}
 featurePlot(res,features="Wnt.signaling.pathway")
+```
+<img align="center" src = 'feature.png'  width=300 height=300>
+
+```{r}
 Heatmap(res,group_by="celltype")
-```   
+```
+<img align="center" src = 'heat.jpg'  width=300 height=300>
+  
 ## Note
 The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development.
 
