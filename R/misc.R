@@ -494,3 +494,77 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
               '#808080'
 )
 
+
+#' do anova test and return results as data.frame
+#' @importFrom rstatix anova_test
+#' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom dplyr group_by
+#' @param x data.frame with sample id as the column name, genes or otu as rownames
+#' @param group group factor used for comparison
+#' @param ... parameters to anova_test
+#' @examples
+#' {
+#' data("ToothGrowth")
+#' do_aov(ToothGrowth,group="supp")
+#' }
+#' @author Kai Guo
+.do_aov<-function(x,group,...){
+  d<-x[,setdiff(colnames(x),group)]
+  d$group<-x[,group]
+  d<-d%>%gather(type,val,-group)
+  res<-d%>%group_by(type)%>%anova_test(val~group,...)
+  return(res)
+}
+
+#' do t.test
+#' @importFrom rstatix t_test
+#' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom dplyr group_by
+#' @param x data.frame with sample id as the column name, genes or otu as rownames
+#' @param group group factor used for comparison
+#' @param ref reference group
+#' @param method correction method, a character string
+#' @param ... parameters to t_test
+#' @examples
+#' {
+#' data("mtcars")
+#' do_ttest(mtcars,group="vs")
+#' do_ttest(mtcars,group="cyl",ref="4")
+#' }
+#' @author Kai Guo
+.do_ttest<-function(x,group,ref=NULL,method = "BH",...){
+  d<-x[,setdiff(colnames(x),group)]
+  d$group<-x[,group]
+  d<-d%>%gather(type,val,-group)
+  res<-d%>%group_by(type)%>%t_test(val~group,ref.group = ref,...)
+  res$p.adj<-p.adjust(res$p,method = method)
+  return(res)
+}
+
+#' do wilcox test
+#' @importFrom rstatix wilcox_test
+#' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom dplyr group_by
+#' @param x data.frame with sample id as the column name, genes or otu as rownames
+#' @param group group factor used for comparison
+#' @param ref reference group
+#' @param method correction method, a character string
+#' @param ... parameters to wilcox_test
+#' @examples
+#' {
+#' data("mtcars")
+#' do_wilcox(mtcars,group="vs")
+#' do_wilcox(mtcars,group="cyl",ref="4")
+#' }
+#' @author Kai Guo
+.do_wilcox<-function(x,group,ref=NULL, method = "BH",...){
+  d<-x[,setdiff(colnames(x),group)]
+  d$group<-x[,group]
+  d<-d%>%gather(type,val,-group)
+  res<-d%>%group_by(type)%>%wilcox_test(val~group,ref.group = ref,...)
+  res$p.adj<-p.adjust(res$p,method=method)
+  return(res)
+}

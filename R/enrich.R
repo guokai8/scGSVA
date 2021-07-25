@@ -26,6 +26,12 @@
 #' @importFrom Seurat as.Seurat
 #' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix summary
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' data(pbmc_small)
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(pbmc_small,hsko)
 #' @author Kai Guo
 #' @export
 scgsva <- function(obj, annot = NULL,
