@@ -109,7 +109,7 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
 #' @importFrom ggplot2 scale_fill_manual aes theme_classic
-#' @importFrom ggplot2 geom_violin
+#' @importFrom ggplot2 geom_violin geom_jitter
 #' @importFrom tidyr gather
 #' @importFrom viridis scale_color_viridis
 #' @param object A GSVA objectect or data.frame
