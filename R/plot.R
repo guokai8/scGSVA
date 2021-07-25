@@ -4,7 +4,7 @@
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr group_by summarize
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 ggplot geom_point facet_wrap aes_string
 #' @importFrom ggplot2 scale_color_gradient aes theme_classic
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom Seurat Embeddings
@@ -20,6 +20,8 @@
 #' specifying x- and y-dimensions
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
+#' @param nrow Number of rows
+#' @param ncol Number of columns
 #' @param basesize base font size, given in pts.
 #' @param label.size Sets the size of the labels
 #' @param label.color Sets the color of the label text
@@ -35,6 +37,7 @@
 featurePlot<-function(object, features, reduction = "umap", color = NULL,
                       group_by = NULL, label = NULL,
                       dims = c(1, 2), pt.size = 1, pt.shape = 19,
+                      nrow=NULL, ncol = NULL,
                       basesize = 12,
                       label.size = 4, label.color="black"){
     seu <- object@obj
@@ -89,13 +92,13 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
     }
     if(length(features) > 1){
         if(!is.null(group_by)){
-            p <- p + facet_grid(as.formula(paste("path",'~',group_by)))
+            p <- p + facet_wrap(as.formula(paste0("path",'~',group_by)),ncol=ncol,nrow=nrow)
         }else{
-            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+            p <- p + facet_wrap(as.formula(paste0( '.~',"path")),ncol=ncol,nrow=nrow)
         }
     }else{
         if(!is.null(group_by)){
-            p <- p + facet_grid(as.formula(paste('.~',group_by)))
+            p <- p + facet_wrap(as.formula(paste('.~',group_by)))
         }
     }
     p <- p + theme_classic(base_size=basesize) + labs(color="NES")
@@ -107,7 +110,7 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr group_by summarize
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string
+#' @importFrom ggplot2 ggplot geom_point facet_wrap aes_string
 #' @importFrom ggplot2 scale_fill_manual aes theme_classic
 #' @importFrom ggplot2 geom_violin geom_jitter
 #' @importFrom tidyr gather
@@ -119,6 +122,8 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @param split.by Factor to split the groups by
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
+#' @param nrow Number of rows
+#' @param ncol Number of columns
 #' @param basesize base font size, given in pts.
 #' @examples
 #' set.seed(123)
@@ -131,7 +136,9 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @export
 vlnPlot<-function(object, features, group_by = NULL,color = NULL,
                   split.by = NULL,
-                  pt.size = 0, pt.shape = 19, basesize = 12){
+                  pt.size = 0, pt.shape = 19,
+                  nrow=NULL, ncol = NULL,
+                  basesize = 12){
 
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
@@ -172,14 +179,17 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
         guides(fill = FALSE)+xlab("")
     if(length(features) > 1){
         if(!is.null(split.by)){
-            p <- p + facet_grid(as.formula(paste("facet", '~', "path")))
+            p <- p + facet_wrap(as.formula(paste("facet", '~', "path")),
+                            ncol=ncol,nrow=nrow)
         }else{
-            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+            p <- p + facet_wrap(as.formula(paste( '.~',"path")),
+                            ncol=ncol,nrow=nrow)
         }
         p <- p + ylab("Normalized Enrichment Score")
     }else{
         if(!is.null(split.by)){
-            p <- p + facet_grid(as.formula(paste('.~','facet')))
+            p <- p + facet_wrap(as.formula(paste('.~','facet')),
+                            ncol=ncol,nrow=nrow)
         }
         p <- p + ylab(paste0(features,"(NES)"))
     }
@@ -191,7 +201,7 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr group_by summarise
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 ggplot geom_point facet_grid aes_string theme_classic
+#' @importFrom ggplot2 ggplot geom_point facet_wrap aes_string theme_classic
 #' @importFrom ggplot2 scale_color_gradient aes theme element_text
 #' @importFrom tidyr gather
 #' @importFrom viridis scale_color_viridis
@@ -202,6 +212,8 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
 #' @param group_by Name of one or more metadata columns to group (color) cells by
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
+#' @param nrow Number of rows
+#' @param ncol Number of columns
 #' @param basesize base font size, given in pt
 #' @examples
 #' set.seed(123)
@@ -214,6 +226,7 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
 #' @export
 dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
                   pt.size = 3, pt.shape = 19,
+                  nrow=NULL, ncol = NULL,
                   basesize = 12){
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
@@ -233,8 +246,8 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
     if(length(features)>1){
         if(!is.null(split.by)){
             gsva <- gather(gsva, path, val, -group, -facet)
-            gsva <- gsva%>%group_by(path,group,facet)%>%s
-            ummarise(val = mean(val))
+            gsva <- gsva%>%group_by(path,group,facet)%>%
+                summarise(val = mean(val))
         }else{
             gsva <- gather(gsva, path, val, -group)
             gsva <- gsva%>%group_by(path,group)%>%
@@ -258,7 +271,8 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
         }
     }
     if(!is.null(split.by)){
-        p <- p + facet_grid(as.formula(paste("facet", '~.')))
+        p <- p + facet_wrap(as.formula(paste0("facet", '~.')),
+                        ncol=ncol,nrow=nrow)
     }
     p <- p + xlab("") + ylab("") + theme_classic(base_size=basesize)+
         labs(color = "Average NES")+
@@ -271,7 +285,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' enrichment across groups with a ridge plot.
 #' @importFrom ggridges geom_density_ridges geom_density_ridges2 position_points_jitter
 #' @importFrom tidyr gather
-#' @importFrom ggplot2 ggplot aes_string scale_fill_manual facet_grid theme_classic
+#' @importFrom ggplot2 ggplot aes_string scale_fill_manual facet_wrap theme_classic
 #' @importFrom ggplot2 ylab xlab guides labs
 #' @param object A GSVA objectect or data.frame
 #' @param features A vector of features to plot
@@ -280,6 +294,8 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' @param color Colors to use for identity class plotting
 #' @param split.by Factor to split the groups by
 #' @param rug Adds a rug representation or not
+#' @param nrow Number of rows
+#' @param ncol Number of columns
 #' @param basesize base font size, given in pt
 #' @examples
 #' set.seed(123)
@@ -292,7 +308,9 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
 #' @export
 ridgePlot<-function(object, features, group_by = NULL, color = NULL,
                     split.by = NULL,
-                    rug = TRUE, basesize = 12){
+                    rug = TRUE,
+                    nrow=NULL, ncol = NULL,
+                    basesize = 12){
     if (inherits(x = object, what = "GSVA")) {
         seu <- object@obj
         gsva <- object@gsva[, features, drop=F]
@@ -337,14 +355,17 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL,
         guides(fill = FALSE)
     if(length(features) > 1){
         if(!is.null(split.by)){
-            p <- p + facet_grid(as.formula(paste("facet", '~', "path")))
+            p <- p + facet_wrap(as.formula(paste0("facet", '~', "path")),
+                            ncol=ncol,nrow=nrow)
         }else{
-            p <- p + facet_grid(as.formula(paste( '.~',"path")))
+            p <- p + facet_wrap(as.formula(paste0( '.~',"path")),
+                            ncol=ncol,nrow=nrow)
         }
         p <- p + xlab("")
     }else{
         if(!is.null(split.by)){
-            p <- p + facet_grid(as.formula(paste('.~','facet')))
+            p <- p + facet_wrap(as.formula(paste0('.~','facet')),
+                            ncol=ncol,nrow=nrow)
         }
         p <- p + xlab(paste0(features,"(NES)"))
     }
