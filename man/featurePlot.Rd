@@ -14,6 +14,8 @@ featurePlot(
   dims = c(1, 2),
   pt.size = 1,
   pt.shape = 19,
+  nrow = NULL,
+  ncol = NULL,
   basesize = 12,
   label.size = 4,
   label.color = "black"
@@ -38,6 +40,10 @@ specifying x- and y-dimensions}
 \item{pt.size}{Size of the points on the plot}
 
 \item{pt.shape}{If NULL, all points are circles (default)}
+
+\item{nrow}{Number of rows}
+
+\item{ncol}{Number of columns}
 
 \item{basesize}{base font size, given in pts.}
 

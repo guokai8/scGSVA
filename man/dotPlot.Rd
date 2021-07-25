@@ -12,6 +12,8 @@ dotPlot(
   color = NULL,
   pt.size = 3,
   pt.shape = 19,
+  nrow = NULL,
+  ncol = NULL,
   basesize = 12
 )
 }
@@ -29,6 +31,10 @@ dotPlot(
 \item{pt.size}{Size of the points on the plot}
 
 \item{pt.shape}{If NULL, all points are circles (default)}
+
+\item{nrow}{Number of rows}
+
+\item{ncol}{Number of columns}
 
 \item{basesize}{base font size, given in pt}
 }

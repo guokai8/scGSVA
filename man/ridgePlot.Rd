@@ -11,6 +11,8 @@ ridgePlot(
   color = NULL,
   split.by = NULL,
   rug = TRUE,
+  nrow = NULL,
+  ncol = NULL,
   basesize = 12
 )
 }
@@ -27,6 +29,10 @@ or a vector to show the group}
 \item{split.by}{Factor to split the groups by}
 
 \item{rug}{Adds a rug representation or not}
+
+\item{nrow}{Number of rows}
+
+\item{ncol}{Number of columns}
 
 \item{basesize}{base font size, given in pt}
 }
