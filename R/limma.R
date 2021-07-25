@@ -52,7 +52,7 @@ findPathway <- function(object, group = NULL, ref = NULL){
 #' data(pbmc_small)
 #' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 #' sc<-scgsva(pbmc_small,hsko)
-#' res <- sigPath(sc, group = "group")
+#' res <- sigPathway(sc, group = "group")
 #' @export
 #' @author Kai Guo
 sigPathway<-function(object, group = NULL, test.use = "wilcox", ref = NULL,
@@ -67,14 +67,14 @@ sigPathway<-function(object, group = NULL, test.use = "wilcox", ref = NULL,
         gsva$group <- meta[rownames(gsva), group]
     }else{
         gsva <- object
-        gsva <- cbind(gsva,group = group)
+        gsva <- cbind(gsva, group = group)
         }
     if(test.use == "t.test" | test.use == "t"){
-        res <- .do_ttest(gsva, group = group, ref = ref, method = method)
+        res <- .do_ttest(gsva, group = "group", ref = ref, method = method)
     }else if(test.use == "wilcox" | test.use == "w"){
-        res <- .do_wilcox(gsva, group = group, ref = ref, method = method)
+        res <- .do_wilcox(gsva, group = "group", ref = ref, method = method)
     }else if(test.use == "anova" | test.use == "aov"| test.use == "a"){
-        res <- .do_aov(gsva, group = group)
+        res <- .do_aov(gsva, group = "group")
     }else{
         cat("Please specify the test method: t.test, wilcox or anova!\n")
     }
