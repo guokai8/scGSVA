@@ -53,6 +53,13 @@ runs the SSGSEA method}
 \description{
 GSVA function for single cell data or data.frame with expression value
 }
+\examples{
+set.seed(123)
+library(scGSVA)
+data(pbmc_small)
+hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+res<-scgsva(pbmc_small,hsko)
+}
 \author{
 Kai Guo
 }
