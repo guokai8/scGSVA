@@ -10,6 +10,8 @@ Heatmap(
   group_by = NULL,
   color = NULL,
   scale = "row",
+  average = FALSE,
+  order_by = NULL,
   fontsize_row = 5,
   fontsize_col = 5,
   border_color = "grey60",
@@ -34,6 +36,11 @@ Heatmap(
 \item{scale}{character indicating if the values should be centered and
 scaled in either the row direction or the column direction, or none.
 Corresponding values are "row", "column" and "none"}
+
+\item{average}{use the average enrichment score or not (default: FALSE)}
+
+\item{order_by}{a charcter indicate the top of heatmap should order, only
+work when cluster_col = FALSE}
 
 \item{fontsize_row}{fontsize for rownames (Default: fontsize)}
 
