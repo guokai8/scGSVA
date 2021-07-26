@@ -43,8 +43,8 @@ Heatmap(res,group_by="group")
 <img align="center" src = 'heat.jpg'  width=300 height=300>
 
 ```{r}
-findPathway(res,group = "celltype")
-sigPathway(res, group = "celltype")
+findPathway(res,group = "groups")
+sigPathway(res, group = "groups")
 ```
   
 ## Note
