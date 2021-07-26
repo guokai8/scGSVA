@@ -153,7 +153,7 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
         }
     }else{
         gsva <- object[, features, drop=F]
-        gsva <- cbind(gsva,group=group_by)
+        gsva <- cbind(gsva, group=group_by)
     }
     if(is.null(color)){
         color <- distcolor[seq_len(length(unique(gsva$group)))]
@@ -382,6 +382,9 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL,
 #' @param scale character indicating if the values should be centered and
 #' scaled in either the row direction or the column direction, or none.
 #' Corresponding values are "row", "column" and "none"
+#' @param average use the average enrichment score or not (default: FALSE)
+#' @param order_by a charcter indicate the top of heatmap should order, only
+#' work when cluster_col = FALSE
 #' @param fontsize_row fontsize for rownames (Default: fontsize)
 #' @param fontsize_col fontsize for colnames (Default: fontsize)
 #' @param border_color color of cell borders on heatmap, use NA if
@@ -408,6 +411,8 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL,
 #' @export
 Heatmap<-function(object, features=NULL, group_by = NULL,
                   color = NULL,scale = "row",
+                  average = FALSE,
+                  order_by = NULL,
                   fontsize_row = 5,
                   fontsize_col = 5,
                   border_color = "grey60",
@@ -439,30 +444,47 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
             gsva <- object[, features, drop = FALSE]
         }
         gsva <- cbind(gsva,group_by)
-        colnames(gsva)[(length(features)+1):ncol(gsva)]<-group_by
+        colnames(gsva)[(length(features)+1):ncol(gsva)] <- group_by
     }
     if(is.null(color)){
         color = viridis(100)
     }
-    dat <- t(gsva[,seq_len(length(features))])
-    if(is.na(annotation_col)){
-        anncol <- gsva[,group_by, drop = FALSE]
+    dat <- gsva[,seq_len(length(features))]
+    if(isTRUE(average)){
+        gg <- gsva[, group_by, drop = FALSE]
+        sf <- apply(gg, 1, function(x) paste(x, sep = "", collapse = "@"))
+        datx <- apply(dat, 2, function(x) tapply(x, sf, mean))
+        anncol <- data.frame(do.call(rbind,strsplit(rownames(datx),"@")))
+        colnames(anncol) <- group_by
+        rownames(anncol) <- rownames(datx)
+        dat <- datx
     }else{
-        anncol <- annotation_col
+        if(is.na(annotation_col)){
+            anncol <- gsva[, group_by, drop = FALSE]
+        }else{
+            anncol <- annotation_col
+        }
     }
     if(is.na(annotation_colors)){
         groupl <- apply(gsva[,group_by, drop = FALSE], 2,
                             function(x)length(unique(x)))
         len <- sum(groupl)
         acolors <- c(distcolor,lightcolor)[1:len]
-        names(acolors) <- as.vector(apply(gsva[,group_by,drop = FALSE], 2,
-                                          function(x)unique(x)))
+        names(acolors) <- as.vector(unlist(apply(gsva[,group_by,drop = FALSE], 2,
+                                          function(x)unique(x))))
         anncolors <- split(acolors,rep(names(groupl),times=groupl))
 
     }else{
         anncolors <- annotation_colors
     }
-    pheatmap(dat,scale=scale,color = color,annotation_col = anncol,
+    if(!is.null(order_by)){
+        ord <- order_by
+    }else{
+        ord <- group_by[1]
+    }
+    anncol <- anncol[order(anncol[,ord]),]
+    dat <- t(dat)[,rownames(anncol)]
+    pheatmap(dat, scale = scale, color = color, annotation_col = anncol,
              annotation_colors = anncolors,cluster_rows = cluster_rows,
              cluster_cols = cluster_cols,
              fontsize_row = fontsize_row,
