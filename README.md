@@ -13,7 +13,7 @@ install_github("guokai8/scGSVA")
 ```{r}
 set.seed(123)   
 library(scGSVA)   
-data(pbmc)
+data(pbmc_small)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmc_small,hsko)
 ```
