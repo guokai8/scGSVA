@@ -18,27 +18,27 @@ hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmc_small,hsko)
 ```
 ```{r}
-vlnPlot(res,features="Wnt.signaling.pathway")
+vlnPlot(res,features="Wnt.signaling.pathway",group_by="groups")
 ```
 <img align="center" src = 'vln.jpg'  width=300 height=300>
 
 ```{r}
-dotPlot(res,features="Wnt.signaling.pathway")
+dotPlot(res,features="Wnt.signaling.pathway",group_by="groups")
 ```
 <img align="center" src = 'dot.png'  width=300 height=300>
 
 ```{r}
-ridgePlot(res,features="Wnt.signaling.pathway")
+ridgePlot(res,features="Wnt.signaling.pathway",group_by="groups")
 ```
 <img align="center" src = 'ridge.jpg'  width=300 height=300>
 
 ```{r}
-featurePlot(res,features="Wnt.signaling.pathway")
+featurePlot(res,features="Wnt.signaling.pathway",group_by="groups")
 ```
 <img align="center" src = 'feature.png'  width=300 height=300>
 
 ```{r}
-Heatmap(res,group_by="group")
+Heatmap(res,group_by="groups")
 ```
 <img align="center" src = 'heat.jpg'  width=300 height=300>
 
