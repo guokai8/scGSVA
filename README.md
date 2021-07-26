@@ -13,7 +13,7 @@ install_github("guokai8/scGSVA")
 ```{r}
 set.seed(123)   
 library(scGSVA)   
-data(pbmc_small)
+data(pbmc)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmc_small,hsko)
 ```
@@ -43,8 +43,8 @@ Heatmap(res,group_by="group")
 <img align="center" src = 'heat.jpg'  width=300 height=300>
 
 ```{r}
-findPathway(res,group = "group")
-sigPathway(res, group = "group")
+findPathway(res,group = "celltype")
+sigPathway(res, group = "celltype")
 ```
   
 ## Note
