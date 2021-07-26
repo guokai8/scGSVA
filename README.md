@@ -33,7 +33,7 @@ ridgePlot(res,features="Wnt.signaling.pathway",group_by="groups")
 <img align="center" src = 'ridge.jpg'  width=350 height=300>
 
 ```{r}
-featurePlot(res,features="Wnt.signaling.pathway",group_by="groups")
+featurePlot(res,features="Wnt.signaling.pathway", reduction="tsne", group_by="groups")
 ```
 <img align="center" src = 'feature.png'  width=350 height=300>
 
