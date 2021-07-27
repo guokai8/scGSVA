@@ -482,7 +482,7 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
     }else{
         ord <- group_by[1]
     }
-    anncol <- anncol[order(anncol[,ord]),]
+    anncol <- anncol[order(anncol[,ord]),,drop=F]
     dat <- t(dat)[,rownames(anncol)]
     pheatmap(dat, scale = scale, color = color, annotation_col = anncol,
              annotation_colors = anncolors,cluster_rows = cluster_rows,
