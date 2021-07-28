@@ -4,12 +4,14 @@
 \alias{.do_aov}
 \title{do anova test and return results as data.frame}
 \usage{
-.do_aov(x, group, ...)
+.do_aov(x, group, method = "BH", ...)
 }
 \arguments{
 \item{x}{data.frame with sample id as the column name, genes or otu as rownames}
 
 \item{group}{group factor used for comparison}
+
+\item{method}{correction method, a character string}
 
 \item{...}{parameters to anova_test}
 }
@@ -19,7 +21,7 @@ do anova test and return results as data.frame
 \examples{
 {
 data("ToothGrowth")
-do_aov(ToothGrowth,group="supp")
+.do_aov(ToothGrowth,group="supp")
 }
 }
 \author{

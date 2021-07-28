@@ -23,8 +23,8 @@ do t.test
 \examples{
 {
 data("mtcars")
-do_ttest(mtcars,group="vs")
-do_ttest(mtcars,group="cyl",ref="4")
+.do_ttest(mtcars,group="vs")
+.do_ttest(mtcars,group="cyl",ref="4")
 }
 }
 \author{
