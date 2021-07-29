@@ -58,6 +58,7 @@ buildAnnot<-function(species = "human", keytype = "SYMBOL", anntype = "GO",
   if(!is.null(OP)){
     GO_FILE <- GO_FILE[GO_FILE$ONTOLOGYALL == OP,]
   }
+  GO_FILE <- GO_FILE[,c(1,2,4)]
   return(GO_FILE)
 }
 #' Build KEGG annotation
