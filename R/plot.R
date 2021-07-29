@@ -255,7 +255,11 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
         }
     }else{
         colnames(gsva)[1] <- "path"
-        gsva <- gsva%>%group_by(group)%>%summarise(val = mean(path))
+        if(!is.null(split.by)){
+            gsva <- gsva%>%group_by(group,facet)%>%summarise(val = mean(path))
+        }else{
+            gsva <- gsva%>%group_by(group)%>%summarise(val = mean(path))
+        }
         gsva$path <- features
     }
     p <- ggplot(gsva,aes_string(x = "group", y = "path"))
@@ -270,10 +274,21 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
             p <- p + scale_color_gradient(low = "white",high = color[1])
         }
     }
-    if(!is.null(split.by)){
-        p <- p + facet_wrap(as.formula(paste0("facet", '~.')),
-                        ncol=ncol,nrow=nrow)
+    if(length(features) > 1){
+        if(!is.null(split.by)){
+            p <- p + facet_wrap(as.formula(paste("facet", '~', "path")),
+                                ncol=ncol,nrow=nrow)
+        }else{
+            p <- p + facet_wrap(as.formula(paste( '.~',"path")),
+                                ncol=ncol,nrow=nrow)
+        }
+    }else{
+        if(!is.null(split.by)){
+            p <- p + facet_wrap(as.formula(paste('facet','~.')),
+                                ncol=ncol,nrow=nrow)
+        }
     }
+
     p <- p + xlab("") + ylab("") + theme_classic(base_size=basesize)+
         labs(color = "Average NES")+
         theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))
