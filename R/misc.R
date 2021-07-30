@@ -3,11 +3,7 @@
 as.data.frame.Annot<-function(x,...){
   as.data.frame(x@annot)
 }
-##' @method row.names Annot
-##' @export
-row.names.Annot<-function(x,...){
-  row.names(x@annot)
-}
+
 
 ##' @method names Annot
 ##' @export
@@ -39,11 +35,6 @@ dim.Annot <- function(x) {
 ##' @export
 as.data.frame.GSVA<-function(x,...){
   as.data.frame(x@gsva)
-}
-##' @method row.names GSVA
-##' @export
-row.names.GSVA<-function(x,...){
-  row.names(x@gsva)
 }
 
 ##' @method names GSVA

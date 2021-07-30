@@ -35,17 +35,57 @@ setGeneric("genes", function(object, features,  useTerm = TRUE,
 setMethod("genes", signature(object = "GSVA"),
           definition = function(object, features, useTerm = TRUE,
                                 with.expr = TRUE) {
-    annot <- object@annot
-    exp <- object@obj
-    input <- exp@assays[["RNA"]]@counts
-    if(isTRUE(useTerm)){
-        features <- gsub(' ','\\.', features)
-        res <- annot[annot[,3]%in%features, ]
-    }else{
-        res <- annot[annot[,2]%in%features, ]
-    }
-    if(isTRUE(with.expr)){
-        res <- cbind(res,input[res[,1], ])
-    }
-    return(res)
+            annot <- object@annot
+            exp <- object@obj
+            input <- exp@assays[["RNA"]]@counts
+            if(isTRUE(useTerm)){
+                if(grepl('\\.',features)){
+                    features <- gsub('\\.',' ', features)
+                }
+                res <- annot[annot[,3]%in%features, ]
+            }else{
+                res <- annot[annot[,2]%in%features, ]
+            }
+            if(isTRUE(with.expr)){
+                res <- cbind(res,input[res[,1], ,drop = FALSE])
+            }
+            return(res)
 })
+
+#' @export
+setMethod(
+    f = "colnames",
+    signature = "GSVA",
+    function(x){
+        gsva <- x@gsva
+        return( colnames(gsva) );
+    });
+#' @export
+setMethod(
+    f = "rownames",
+    signature = "GSVA",
+    function(x){
+        gsva <- x@gsva
+        return( rownames(gsva) );
+    })
+
+#' @export
+setMethod(
+    f = "colnames",
+    signature = "Annot",
+    function(x){
+        annot <- x@annot
+        return( colnames(annot) );
+    });
+
+#' @export
+setMethod(
+    f = "rownames",
+    signature = "Annot",
+    function(x){
+        annot <- x@annot
+        return( rownames(annot) );
+    })
+
+
+
