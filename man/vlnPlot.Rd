@@ -10,6 +10,7 @@ vlnPlot(
   group_by = NULL,
   color = NULL,
   split.by = NULL,
+  split.plot = FALSE,
   pt.size = 0,
   pt.shape = 19,
   nrow = NULL,
@@ -27,6 +28,9 @@ vlnPlot(
 \item{color}{Colors to use for identity class plotting}
 
 \item{split.by}{Factor to split the groups by}
+
+\item{split.plot}{plot each group of the split violin plots by multiple or
+single violin shapes.}
 
 \item{pt.size}{Size of the points on the plot}
 
