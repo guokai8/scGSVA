@@ -120,6 +120,8 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @param group_by Name of one or more metadata columns to group (color) cells by
 #' @param color Colors to use for identity class plotting
 #' @param split.by Factor to split the groups by
+#' @param split.plot plot each group of the split violin plots by multiple or
+#' single violin shapes.
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
 #' @param nrow Number of rows
@@ -135,7 +137,7 @@ featurePlot<-function(object, features, reduction = "umap", color = NULL,
 #' @author Kai Guo
 #' @export
 vlnPlot<-function(object, features, group_by = NULL,color = NULL,
-                  split.by = NULL,
+                  split.by = NULL,split.plot =FALSE,
                   pt.size = 0, pt.shape = 19,
                   nrow=NULL, ncol = NULL,
                   basesize = 12){
@@ -156,7 +158,11 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
         gsva <- cbind(gsva, group=group_by)
     }
     if(is.null(color)){
-        color <- distcolor[seq_len(length(unique(gsva$group)))]
+        if(isTRUE(split.plot)){
+            color <- distcolor[seq_len(length(unique(gsva$facet)))]
+        }else{
+            color <- distcolor[seq_len(length(unique(gsva$group)))]
+        }
     }
     if(length(features)>1){
         if(!is.null(split.by)){
@@ -166,19 +172,23 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
         }
     }
     if(length(features) > 1){
-        p <- ggplot(gsva,aes_string(x="group",y="val",fill="group"))
+        p <- ggplot(gsva,aes_string(x="group",y="val"))
     }else{
-        p <- ggplot(gsva,aes_string(x="group",y=features,fill="group"))
+        p <- ggplot(gsva,aes_string(x="group",y=features))
     }
-    p <- p + geom_violin(trim = F)
+    if(isTRUE(split.plot)){
+        p <- p + geom_split_violin(trim = F, aes_string(fill="facet"))
+    }else{
+        p <- p + geom_violin(trim = F, aes_string(fill="group"))
+    }
     if(pt.size>0){
         p <- p + geom_jitter(size = pt.size, shape = pt.shape)
     }
     p <- p + theme_classic(base_size=basesize)+ scale_fill_manual(values=color)+
         theme(axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5))+
-        guides(fill = FALSE)+xlab("")
+        guides(fill = "none")+xlab("")
     if(length(features) > 1){
-        if(!is.null(split.by)){
+        if(!is.null(split.by)&!isTRUE(split.plot)){
             p <- p + facet_wrap(as.formula(paste("facet", '~', "path")),
                             ncol=ncol,nrow=nrow)
         }else{
@@ -187,7 +197,7 @@ vlnPlot<-function(object, features, group_by = NULL,color = NULL,
         }
         p <- p + ylab("Normalized Enrichment Score")
     }else{
-        if(!is.null(split.by)){
+        if(!is.null(split.by)&!isTRUE(split.plot)){
             p <- p + facet_wrap(as.formula(paste('.~','facet')),
                             ncol=ncol,nrow=nrow)
         }
@@ -508,3 +518,101 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
              show_rownames = show_rownames,show_colnames = show_colnames,...)
 }
 
+
+# A split violin plot geom
+#
+#' @importFrom scales zero_range
+#' @importFrom grid grobTree grobName
+#
+# @author jan-glx on StackOverflow
+# @references \url{https://stackoverflow.com/questions/35717353/split-violin-plot-with-ggplot2}
+# @seealso \code{\link[ggplot2]{geom_violin}}
+#
+GeomSplitViolin <- ggplot2::ggproto(
+    "GeomSplitViolin",
+    ggplot2::GeomViolin,
+    # setup_data = function(data, params) {
+    #   data$width <- data$width %||% params$width %||% (resolution(data$x, FALSE) * 0.9)
+    #   data <- plyr::ddply(data, "group", transform, xmin = x - width/2, xmax = x + width/2)
+    #   e <- globalenv()
+    #   name <- paste(sample(x = letters, size = 5), collapse = '')
+    #   message("Saving initial data to ", name)
+    #   e[[name]] <- data
+    #   return(data)
+    # },
+    draw_group = function(self, data, ..., draw_quantiles = NULL) {
+        data$xminv <- data$x - data$violinwidth * (data$x - data$xmin)
+        data$xmaxv <- data$x + data$violinwidth * (data$xmax - data$x)
+        grp <- data[1, 'group']
+        if (grp %% 2 == 1) {
+            data$x <- data$xminv
+            data.order <- data$y
+        } else {
+            data$x <- data$xmaxv
+            data.order <- -data$y
+        }
+        newdata <- data[order(data.order), , drop = FALSE]
+        newdata <- rbind(
+            newdata[1, ],
+            newdata,
+            newdata[nrow(x = newdata), ],
+            newdata[1, ]
+        )
+        newdata[c(1, nrow(x = newdata) - 1, nrow(x = newdata)), 'x'] <- round(x = newdata[1, 'x'])
+        grob <- if (length(x = draw_quantiles) > 0 & !zero_range(x = range(data$y))) {
+            stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 1))
+            quantiles <- QuantileSegments(data = data, draw.quantiles = draw_quantiles)
+            aesthetics <- data[rep.int(x = 1, times = nrow(x = quantiles)), setdiff(x = names(x = data), y = c("x", "y")), drop = FALSE]
+            aesthetics$alpha <- rep.int(x = 1, nrow(x = quantiles))
+            both <- cbind(quantiles, aesthetics)
+            quantile.grob <- GeomPath$draw_panel(both, ...)
+            grobTree(ggplot2::GeomPolygon$draw_panel(newdata, ...), name = quantile.grob)
+        }
+        else {
+            ggplot2::GeomPolygon$draw_panel(newdata, ...)
+        }
+        grob$name <- grobName(grob = grob, prefix = 'geom_split_violin')
+        return(grob)
+    }
+)
+
+# Create a split violin plot geom
+#
+# @inheritParams ggplot2::geom_violin
+#
+#' @importFrom ggplot2 layer
+#
+# @author jan-glx on StackOverflow
+# @references \url{https://stackoverflow.com/questions/35717353/split-violin-plot-with-ggplot2}
+# @seealso \code{\link[ggplot2]{geom_violin}}
+#
+geom_split_violin <- function(
+    mapping = NULL,
+    data = NULL,
+    stat = 'ydensity',
+    position = 'identity',
+    ...,
+    draw_quantiles = NULL,
+    trim = TRUE,
+    scale = 'area',
+    na.rm = FALSE,
+    show.legend = NA,
+    inherit.aes = TRUE
+) {
+    return(layer(
+        data = data,
+        mapping = mapping,
+        stat = stat,
+        geom = GeomSplitViolin,
+        position = position,
+        show.legend = show.legend,
+        inherit.aes = inherit.aes,
+        params = list(
+            trim = trim,
+            scale = scale,
+            draw_quantiles = draw_quantiles,
+            na.rm = na.rm,
+            ...
+        )
+    ))
+}
