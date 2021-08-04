@@ -54,4 +54,4 @@ The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the si
 
 ## Contact information
 
-For any questions please contact guokai8@gmail.com
+For any questions please contact guokai8@gmail.com or https://github.com/guokai8/scGSVA/issues
