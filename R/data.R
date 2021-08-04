@@ -52,7 +52,7 @@
 #' }
 #' @source `[pbmc_matrix]` processed by Seurat
 #'
-"pbmc_small"
+"pbmcs"
 
 #' Small SingleCellExperiment object
 #' @name sce_small
