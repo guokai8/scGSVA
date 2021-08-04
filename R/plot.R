@@ -438,8 +438,8 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
                   fontsize_row = 5,
                   fontsize_col = 5,
                   border_color = "grey60",
-                  annotation_col = NA,
-                  annotation_colors = NA,
+                  annotation_col = NULL,
+                  annotation_colors = NULL,
                   cluster_rows = TRUE,
                   cluster_cols = TRUE,
                   show_rownames = TRUE, show_colnames = TRUE, ...){
@@ -481,13 +481,13 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
         rownames(anncol) <- rownames(datx)
         dat <- datx
     }else{
-        if(is.na(annotation_col)){
+        if(is.null(annotation_col)){
             anncol <- gsva[, group_by, drop = FALSE]
         }else{
             anncol <- annotation_col
         }
     }
-    if(is.na(annotation_colors)){
+    if(is.null(annotation_colors)){
         groupl <- apply(gsva[,group_by, drop = FALSE], 2,
                             function(x)length(unique(x)))
         len <- sum(groupl)
