@@ -12,9 +12,9 @@ install_github("guokai8/scGSVA")
 ```{r}
 set.seed(123)   
 library(scGSVA)   
-data(pbmc_small)
+data(pbmcs)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
-res<-scgsva(pbmc_small,hsko)
+res<-scgsva(pbmcs,hsko)
 ```
 ```{r}
 vlnPlot(res,features="Wnt.signaling.pathway",group_by="groups")
