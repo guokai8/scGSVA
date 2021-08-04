@@ -286,7 +286,7 @@ dotPlot<-function(object,features,group_by=NULL,split.by=NULL,color=NULL,
     }
     if(length(features) > 1){
         if(!is.null(split.by)){
-            p <- p + facet_wrap(as.formula(paste("facet", '~', "path")),
+            p <- p + facet_wrap(as.formula(paste("facet", '~', ".")),
                                 ncol=ncol,nrow=nrow)
         }
     }else{
