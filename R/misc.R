@@ -535,7 +535,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d <- d %>% gather(type, val, -group)
   res <- d %>% group_by(type) %>% t_test(val~group, ref.group = ref,...)
   res$p.adj <- p.adjust(res$p, method = method)
-  res <- res[, c("type", "group1", "group2", "statistic", "df", "p", "p.adj")]
+  res <- res[, c("type", "group1", "group2", "statistic", "p", "p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
 }
@@ -563,7 +563,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d <- d%>%gather(type,val,-group)
   res <- d%>%group_by(type)%>%wilcox_test(val~group, ref.group = ref, ...)
   res$p.adj <- p.adjust(res$p, method = method)
-  res <- res[, c("type","group1","group2","statistic","df","p","p.adj")]
+  res <- res[, c("type","group1","group2","statistic","p","p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
 }
