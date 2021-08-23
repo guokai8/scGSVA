@@ -407,6 +407,7 @@ ridgePlot<-function(object, features, group_by = NULL, color = NULL,
 #' @param average use the average enrichment score or not (default: FALSE)
 #' @param order_by a charcter indicate the top of heatmap should order, only
 #' work when cluster_col = FALSE
+#' @param decreasing logical.  Should the sort order be increasing or decreasing?
 #' @param fontsize_row fontsize for rownames (Default: fontsize)
 #' @param fontsize_col fontsize for colnames (Default: fontsize)
 #' @param border_color color of cell borders on heatmap, use NA if
@@ -435,6 +436,7 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
                   color = NULL,scale = "row",
                   average = FALSE,
                   order_by = NULL,
+                  decreasing = FALSE,
                   fontsize_row = 5,
                   fontsize_col = 5,
                   border_color = "grey60",
@@ -505,10 +507,11 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
         ord <- group_by[1]
     }
     if(length(ord)>1){
-        ind <- do.call(what = "order", args = anncol[,ord])
+       # ind <- do.call(what = "order", args = anncol[,ord])
+        ind <- do.call(what = "order", args = c(anncol[,ord], list(decreasing=decreasing)))
         anncol<-anncol[ind,]
     }else{
-        anncol<-anncol[order(anncol[,ord]),,drop=FALSE]
+        anncol<-anncol[order(anncol[,ord],decreasing=decreasing),,drop=FALSE]
     }
     dat <- t(dat)[,rownames(anncol)]
     pheatmap(dat, scale = scale, color = color, annotation_col = anncol,
