@@ -504,7 +504,12 @@ Heatmap<-function(object, features=NULL, group_by = NULL,
     }else{
         ord <- group_by[1]
     }
-    anncol <- anncol[order(anncol[,ord]),,drop=F]
+    if(length(ord)>1){
+        ind <- do.call(what = "order", args = anncol[,ord])
+        anncol<-anncol[ind,]
+    }else{
+        anncol<-anncol[order(anncol[,ord]),,drop=FALSE]
+    }
     dat <- t(dat)[,rownames(anncol)]
     pheatmap(dat, scale = scale, color = color, annotation_col = anncol,
              annotation_colors = anncolors,cluster_rows = cluster_rows,
