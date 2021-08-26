@@ -42,6 +42,7 @@ Heatmap(res,group_by="groups")
 <img align="center" src = 'heat.jpg'  width=300 height=300>
 
 ```{r}
+## find significant pathways across groups
 findPathway(res,group = "groups")
 sigPathway(res, group = "groups")
 ``` 
