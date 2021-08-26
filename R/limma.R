@@ -10,7 +10,7 @@
 #' data(pbmc_small)
 #' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 #' sc<-scgsva(pbmc_small,hsko)
-#' res <- findPathway(sc, group = "group", ref = "g1")
+#' res <- findPathway(sc, group = "groups", ref = "g1")
 #' @export
 #' @author Kai Guo
 #'
@@ -31,13 +31,26 @@ findPathway <- function(object, group = NULL, ref = NULL){
     level <- unique(group)
     if(!is.null(ref)){
         level <- c(ref,setdiff(level, ref))
+    }else{
+        ref <- level[1]
     }
+    lev <- expand.grid(setdiff(level,ref),ref)
+    levn <- apply(lev, 1, function(x)paste0(x[1],"_vs_",x[2],"@@"))
     group <- factor(as.vector(group), levels = level, ordered = F)
     design <- model.matrix(~group)
-    colnames(design) <- levels(group)
+    colnames(design) <- c(ref,levn)
     fit <- lmFit(gsva, design)
     fit1 <- eBayes(fit)
-    res <- topTable(fit1, adjust = 'BH', coef = 2, number = Inf)
+    if(length(level)>2){
+        res <- do.call(rbind,sapply(levn,function(x)topTable(fit1,
+                        adjust = 'BH', coef=x, number=Inf),simplify=F))
+        res$term <- sub('^\\.','',sub('.*@@','',rownames(res)))
+        res$comparision <- sub('@@.*','',rownames(res))
+        rownames(res)<-NULL
+    }else{
+        res <- topTable(fit1, adjust = 'BH', coef = 2, number = Inf)
+        res$comparision <- sub('@@.*','',levn)
+    }
     return(res)
 }
 #' Significance testing between groups.
@@ -73,7 +86,7 @@ sigPathway<-function(object, group = NULL, test.use = "wilcox", ref = NULL,
         res <- .do_ttest(gsva, group = "group", ref = ref, method = method)
     }else if(test.use == "wilcox" | test.use == "w"){
         res <- .do_wilcox(gsva, group = "group", ref = ref, method = method)
-    }else if(test.use == "anova" | test.use == "aov"| test.use == "a"){
+    }else if(test.use == "anova" | test.use == "aov" | test.use == "a"){
         res <- .do_aov(gsva, group = "group")
     }else{
         cat("Please specify the test method: t.test, wilcox or anova!\n")
