@@ -23,7 +23,7 @@ library(scGSVA)
 data(pbmc_small)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 sc<-scgsva(pbmc_small,hsko)
-res <- findPathway(sc, group = "group", ref = "g1")
+res <- findPathway(sc, group = "groups", ref = "g1")
 }
 \author{
 Kai Guo

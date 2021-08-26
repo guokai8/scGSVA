@@ -42,9 +42,9 @@ Corresponding values are "row", "column" and "none"}
 
 \item{order_by}{a charcter indicate the top of heatmap should order, only
 work when cluster_col = FALSE}
-  
+
 \item{decreasing}{logical.  Should the sort order be increasing or decreasing?}
- 
+
 \item{fontsize_row}{fontsize for rownames (Default: fontsize)}
 
 \item{fontsize_col}{fontsize for colnames (Default: fontsize)}
