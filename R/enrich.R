@@ -45,7 +45,7 @@ scgsva <- function(obj, annot = NULL,
                    verbose=TRUE) {
     tau=switch(method, gsva=1, ssgsea=0.25, NA)
     if(is.null(annot)) {
-        stop("Please provide anotation object or data.frame")
+        stop("Please provide annotation object or data.frame")
     } else {
         if(isTRUE(useTerm)){
             annotation <- split(annot[,1],annot[,3])
