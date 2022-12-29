@@ -505,8 +505,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d<-x[,setdiff(colnames(x),group)]
   d$group<-x[,group]
   d<-d%>%gather(type,val,-group)
-  res<-d%>%group_by(type)%>%anova_test(val~group,...)%>%
-      mutate(p.adj = p.adjust(p, method = method))
+  res<-d%>%group_by(type)%>%anova_test(val~group,...)
   num_of_groups<-length(unique(d$group))
   if(num_of_groups == 2)
       res$p.adj <- p.adjust(res$p, method = method)
@@ -536,8 +535,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d <- x[, setdiff(colnames(x),group)]
   d$group <- x[, group]
   d <- d %>% gather(type, val, -group)
-  res <- d %>% group_by(type) %>% t_test(val~group, ref.group = ref,...)%>%
-      mutate(p.adj = p.adjust(p, method = method))
+  res <- d %>% group_by(type) %>% t_test(val~group, ref.group = ref,...)
   num_of_groups<-length(unique(d$group))
   if(num_of_groups == 2)
       res$p.adj <- p.adjust(res$p, method = method)
@@ -567,8 +565,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d <- x[, setdiff(colnames(x), group)]
   d$group <- x[, group]
   d <- d%>%gather(type,val,-group)
-  res <- d%>%group_by(type)%>%wilcox_test(val~group, ref.group = ref, ...)%>%
-      mutate(p.adj = p.adjust(p, method = method))
+  res <- d%>%group_by(type)%>%wilcox_test(val~group, ref.group = ref, ...)
   num_of_groups<-length(unique(d$group))
   if(num_of_groups == 2)
       res$p.adj <- p.adjust(res$p, method = method)
