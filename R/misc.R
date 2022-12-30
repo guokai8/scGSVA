@@ -506,10 +506,10 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d$group<-x[,group]
   d<-d%>%gather(type,val,-group)
   res<-d%>%group_by(type)%>%anova_test(val~group,...)
-  num_of_groups<-length(unique(d$group))
-  if(num_of_groups == 2)
-      res$p.adj <- p.adjust(res$p, method = method) 
-  ##### adjusted the overall p values if only have one comparision within each group
+  #num_of_groups<-length(unique(d$group))
+  #if(num_of_groups == 2)
+  res$p.adj <- p.adjust(res$p, method = method) 
+  ##### adjusted the overall p values if only have one comparision within each group (not sure)
   res <- res[, c("type", "F", "p", "p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
@@ -537,10 +537,10 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d$group <- x[, group]
   d <- d %>% gather(type, val, -group)
   res <- d %>% group_by(type) %>% t_test(val~group, ref.group = ref,...)
-  num_of_groups<-length(unique(d$group))
-  if(num_of_groups == 2)
-      res$p.adj <- p.adjust(res$p, method = method)
-  ##### adjusted the overall p values if only have one comparision within each group
+ # num_of_groups<-length(unique(d$group))
+ # if(num_of_groups == 2)
+  res$p.adj <- p.adjust(res$p, method = method)
+  ##### adjusted the overall p values if only have one comparision within each group (not sure)
   res <- res[, c("type", "group1", "group2", "statistic", "p", "p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
@@ -568,10 +568,10 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   d$group <- x[, group]
   d <- d%>%gather(type,val,-group)
   res <- d%>%group_by(type)%>%wilcox_test(val~group, ref.group = ref, ...)
-  num_of_groups<-length(unique(d$group))
-  if(num_of_groups == 2)
-      res$p.adj <- p.adjust(res$p, method = method)
-  ##### adjusted the overall p values if only have one comparision within each group
+#  num_of_groups<-length(unique(d$group))
+#  if(num_of_groups == 2)
+  res$p.adj <- p.adjust(res$p, method = method)
+  ##### adjusted the overall p values if only have one comparision within each group (not sure)
   res <- res[, c("type","group1","group2","statistic","p","p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
