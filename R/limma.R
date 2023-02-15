@@ -65,7 +65,7 @@ findPathway <- function(object, group = NULL, ref = NULL){
 #' data(pbmc_small)
 #' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 #' sc<-scgsva(pbmc_small,hsko)
-#' res <- sigPathway(sc, group = "group")
+#' res <- sigPathway(sc, group = "groups")
 #' @export
 #' @author Kai Guo
 sigPathway<-function(object, group = NULL, test.use = "wilcox", ref = NULL,
