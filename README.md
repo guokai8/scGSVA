@@ -2,7 +2,9 @@
 # scGSVA [![Project Status:](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![](https://img.shields.io/badge/devel%20version-0.0.13-green.svg)](https://github.com/guokai8/scGSVA)  ![Code Size:](https://img.shields.io/github/languages/code-size/guokai8/scGSVA)
 ## Description
 _scGSVA_ provides wrap functions to do GSVA analysis for single cell data. And scGSVA includes functions to build annotation for almost all species. scGSVA also provides function to generate figures based on the GSVA results.
+
 _scGSVA_ provides functions to generate annotation data which can be used in the analysis.
+
 _Fixed some issues since there was a bug due to the KEGG annotation changed these days
 ## Installation
 ```
