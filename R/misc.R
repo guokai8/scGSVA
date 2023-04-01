@@ -128,27 +128,29 @@ subset.GSVA <-  function(x, ...) {
 }
 ##' @importFrom KEGGREST keggList
 .get_kg_dat<-function(builtin=TRUE){
-  if(isTRUE(builtin)){
-    data(kegg)
-    return(kegg.db)
-  }else{
-    pathway<-cbind(keggList('pathway'))
-    rownames(pathway)<-sub('.*map','',rownames(pathway))
-    colnames(pathway)<-"annotation"
-    pathway<-as.data.frame(pathway)
-    pathway$annotation<-as.vector(pathway$annotation)
-    return(pathway)
-  }
+    if(isTRUE(builtin)){
+        data(kegg)
+        return(kegg.db)
+    }else{
+        # pathway<-cbind(keggList('pathway'))
+        #rownames(pathway)<-sub('.*map','',rownames(pathway))
+        #colnames(pathway)<-"annotation"
+        #pathway<-as.data.frame(pathway)
+        #pathway$annotation<-as.vector(pathway$annotation)
+        data(pathway)
+        return(pathway)
+    }
 }
 ##' @importFrom KEGGREST keggList
 ##'
 .get_kgm.data <- function(){
-  module <-  cbind(keggList('module'))
-  rownames(module)<-sub('md:','',rownames(module))
-  colnames(module)<-"annotation"
-  module<-as.data.frame(module)
-  module$annotation<-as.vector(module$annotation)
-  return(module)
+    #module <-  cbind(keggList('module'))
+    #rownames(module)<-sub('md:','',rownames(module))
+    #colnames(module)<-"annotation"
+    #module<-as.data.frame(module)
+    #module$annotation<-as.vector(module$annotation)
+    data(module)
+    return(module)
 }
 
 ##' build annotaion for kegg
@@ -508,7 +510,7 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   res<-d%>%group_by(type)%>%anova_test(val~group,...)
   #num_of_groups<-length(unique(d$group))
   #if(num_of_groups == 2)
-  res$p.adj <- p.adjust(res$p, method = method) 
+  res$p.adj <- p.adjust(res$p, method = method)
   ##### adjusted the overall p values if only have one comparision within each group (not sure)
   res <- res[, c("type", "F", "p", "p.adj")]
   colnames(res)[1] <- "Path"
