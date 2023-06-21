@@ -132,12 +132,12 @@ subset.GSVA <-  function(x, ...) {
         data(kegg)
         return(kegg.db)
     }else{
-        # pathway<-cbind(keggList('pathway'))
-        #rownames(pathway)<-sub('.*map','',rownames(pathway))
-        #colnames(pathway)<-"annotation"
-        #pathway<-as.data.frame(pathway)
-        #pathway$annotation<-as.vector(pathway$annotation)
-        data(pathway)
+         pathway<-cbind(keggList('pathway'))
+        rownames(pathway)<-sub('.*map','',rownames(pathway))
+        colnames(pathway)<-"annotation"
+        pathway<-as.data.frame(pathway)
+        pathway$annotation<-as.vector(pathway$annotation)
+        #data(pathway)
         return(pathway)
     }
 }
