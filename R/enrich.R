@@ -81,7 +81,11 @@ scgsva <- function(obj, annot = NULL,
                  verbose=verbose
                  )
     annot <- annot[annot[,1]%in%rownames(input),]
-    annot <- annot[order(annot[,3]),]
+    if(isTRUE(useTerm)){
+      annot <- annot[order(annot[,3]),]
+      }else{
+      annot <- annot[order(annot[,2]),]
+      }
     res<-new("GSVA",
              obj=obj,
              gsva=out,
