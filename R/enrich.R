@@ -106,7 +106,8 @@ scgsva <- function(obj, annot = NULL,
     out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
                                    ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
                                    BPPARAM = SerialParam(progressbar=verbose)))
-    output <- data.frame(t(out))
+    #output <- data.frame(t(out))
+    output <- data.frame(t(out), check.names=FALSE) 
     return(output)
 }
 
