@@ -108,7 +108,7 @@ buildAnnot<-function(species = "human", keytype = "SYMBOL", anntype = "GO",
 ##' @param species the species for query
 ##' @param keytype the gene ID type
 ##' @param anntype anntotaion type of  gene set (GO,BP,CC,MF,KEGG,REACTOME,
-##' BIOCARTA)
+##' BIOCARTA,HALLMARK)
 ##' @examples
 ##' \dontrun{
 ##' hsamsi<-buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
@@ -119,6 +119,10 @@ buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO"){
   flag <- 0
   anntypes <- NULL
   if(!is.null(anntype)){
+    if(anntype=="HALLMARK"){
+        category <- "H"
+        anntype <- ""
+    }
     if(anntype == "CGP"){
       category <- "C2"
     }
