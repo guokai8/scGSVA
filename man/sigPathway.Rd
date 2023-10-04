@@ -31,7 +31,7 @@ library(scGSVA)
 data(pbmc_small)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 sc<-scgsva(pbmc_small,hsko)
-res <- sigPathway(sc, group = "group")
+res <- sigPathway(sc, group = "groups")
 }
 \author{
 Kai Guo

@@ -12,7 +12,7 @@ buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
 \item{keytype}{the gene ID type}
 
 \item{anntype}{anntotaion type of  gene set (GO,BP,CC,MF,KEGG,REACTOME,
-BIOCARTA)}
+BIOCARTA,HALLMARK)}
 }
 \description{
 Download database from Msigdb and prepare for enrichment analysis
