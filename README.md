@@ -1,11 +1,13 @@
 # scGSVA: GSVA for single cell RNA seq analysis. 
-# scGSVA [![Project Status:](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![](https://img.shields.io/badge/devel%20version-0.0.16-green.svg)](https://github.com/guokai8/scGSVA)  ![Code Size:](https://img.shields.io/github/languages/code-size/guokai8/scGSVA)
+# scGSVA [![Project Status:](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![](https://img.shields.io/badge/devel%20version-0.0.17-green.svg)](https://github.com/guokai8/scGSVA)  ![Code Size:](https://img.shields.io/github/languages/code-size/guokai8/scGSVA)
 ## Description
 _scGSVA_ provides wrap functions to do GSVA analysis for single cell data. And scGSVA includes functions to build annotation for almost all species. scGSVA also provides function to generate figures based on the GSVA results.
 
 _scGSVA_ provides functions to generate annotation data which can be used in the analysis.
 
 _Fixed some issues since there was a bug due to the KEGG annotation changed these days._
+_Add batch calculation when the cell population is huge
+_Add UCell function within the scgsva function
 ## Installation
 ```
 library(devtools)
@@ -17,7 +19,7 @@ set.seed(123)
 library(scGSVA)   
 data(pbmcs)
 hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
-res<-scgsva(pbmcs,hsko)
+res<-scgsva(pbmcs,hsko,method="ssgsea") ## or use UCell
 ```
 ```{r}
 vlnPlot(res,features="Wnt.signaling.pathway",group_by="groups")
