@@ -1,13 +1,13 @@
 Package: scGSVA
 Type: Package
-Title: GSVA for single cell RNA seq analysis
-Version: 0.0.16
+Title: GSVA and UCell signature enrichment analysis for single cell RNA seq 
+Version: 0.0.17
 Authors@R: c(person("Kai","Guo",email = "guokai8@gmail.com",
            role = c("aut", "cre")
           ),
           person("Zhihan","Wang",role = "aut"))
 Maintainer: Kai Guo <guokai8@gmail.com>
-Description: scGSVA provide function to do GSVA analysis for single cell data
+Description: scGSVA provide function to do GSVA and UCell analysis for single cell data
 License: GPLv3.0
 Depends: R (>= 3.5.0)
 Imports:
@@ -35,6 +35,7 @@ Imports:
     AnnotationDbi,
     viridis,
     rstatix,
+    UCell,
     testthat
 Encoding: UTF-8
 LazyData: yes
