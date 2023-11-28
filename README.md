@@ -22,7 +22,7 @@ hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
 res<-scgsva(pbmcs,hsko,method="ssgsea") ## or use UCell
 ```
 ```{r}
-vlnPlot(res,features="Wnt.signaling.pathway",group_by="groups") ## split.plot = TRUE 
+vlnPlot(res,features="Wnt.signaling.pathway",group_by="groups") ## split.plot = TRUE and split.by
 ```
 <img align="center" src = 'vln.jpg'  width=350 height=300>
 
