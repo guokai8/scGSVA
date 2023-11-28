@@ -79,7 +79,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL,
         input <- obj
     }
     if(method == "UCell"){
-        out<- suppressWarnings(ScoreSignatures_UCell(input, features=annotation,
+        out<- suppressWarnings(UCell::ScoreSignatures_UCell(input, features=annotation,
                                                                 chunk.size = batch, ncores = cores,
                                                      BPPARAM=SerialParam(progressbar=verbose),...))
         colnames(out)<-gsub(' ','\\.',sub('_UCell','',colnames(out)))
