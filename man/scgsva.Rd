@@ -7,6 +7,8 @@
 scgsva(
   obj,
   annot = NULL,
+  assay = NULL,
+  batch = 1000,
   method = "ssgsea",
   kcdf = "Poisson",
   abs.ranking = FALSE,
@@ -15,8 +17,10 @@ scgsva(
   mx.diff = TRUE,
   ssgsea.norm = TRUE,
   useTerm = TRUE,
+  BPPARAM = SnowParam(),
   cores = 4,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
@@ -24,12 +28,14 @@ scgsva(
 
 \item{annot}{annotation object}
 
+\item{assay}{Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)}
+
 \item{method}{to employ in the estimation of gene-set enrichment scores per
-sample. By default this is set to gsva}
+sample. By default this is set to ssgsea, you can also set it as UCell if you would like use the UCell method}
 
 \item{kcdf}{Character string denoting the kernel to use during the
 non-parametric estimation of the cumulative distribution function of
-expression levels across samples when method="gsva".
+expression levels across samples when method="ssgsea".
 By default, kcdf="Poisson"}
 
 \item{abs.ranking}{Flag used only when mx.diff=TRUE.}
