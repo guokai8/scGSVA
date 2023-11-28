@@ -4,12 +4,24 @@ as.data.frame.Annot<-function(x,...){
   as.data.frame(x@annot)
 }
 
-
 ##' @method names Annot
 ##' @export
 names.Annot<-function(x,...){
   names(x@annot)
 }
+
+##' @method row.names Annot
+##' @export
+row.names.Annot<-function(x,...){
+    row.names(x@annot)
+}
+##' @method colnames Annot
+##' @export
+colnames.Annot<-function(x,...){
+    colnames(x@annot)
+}
+
+
 ##' @importFrom utils head
 ##' @method head Annot
 ##' @export
@@ -42,18 +54,31 @@ as.data.frame.GSVA<-function(x,...){
 names.GSVA<-function(x,...){
   names(x@gsva)
 }
+
+##' @method row.names Annot
+##' @export
+row.names.GSVA<-function(x,...){
+    row.names(x@gsva)
+}
+
+##' @method colnames Annot
+##' @export
+colnames.GSVA<-function(x,...){
+    colnames(x@gsva)
+}
+
 ##' @importFrom utils head
 ##' @method head GSVA
 ##' @export
 head.GSVA<-function(x,n=6L,...){
-  head(x@gsva,n,...)
+  head(x@gsva,c(n,n),...)
 }
 
 ##' @importFrom utils tail
 ##' @method tail GSVA
 ##' @export
 tail.GSVA<-function(x,n=6L,...){
-  tail(x@gsva,n,...)
+  tail(x@gsva,c(n,n),...)
 }
 
 ##' @method dim GSVA
@@ -577,4 +602,29 @@ lightcolor<-c('#E5D2DD', '#53A85F', '#F1BB72', '#F3B1A0', '#D6E7A3', '#57C3F3', 
   res <- res[, c("type","group1","group2","statistic","p","p.adj")]
   colnames(res)[1] <- "Path"
   return(res)
+}
+#  modified from "https://github.com/carmonalab/UCell/blob/master/R/HelperFunctions.R"
+#' Split data matrix into smaller sub-matrices ('chunks')
+#'
+#' @param   matrix      Input data matrix
+#' @param   chunk.size  How many cells to include in each sub-matrix
+#'
+#' @return  A list of sub-matrices, each with size {n_features x chunk_size}
+split.data.matrix <- function(matrix, chunk.size=1000) {
+    ncols <- dim(matrix)[2]
+    nchunks <- (ncols-1) %/% chunk.size + 1
+
+    split.data <- list()
+    min <- 1
+    for (i in seq_len(nchunks)) {
+        if (i == nchunks-1) {  #make last two chunks of equal size
+            left <- ncols-(i-1)*chunk.size
+            max <- min+round(left/2)-1
+        } else {
+            max <- min(i*chunk.size, ncols)
+        }
+        split.data[[i]] <- matrix[,min:max,drop=FALSE]
+        min <- max+1    #for next chunk
+    }
+    return(split.data)
 }

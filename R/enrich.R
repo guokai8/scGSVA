@@ -2,11 +2,12 @@
 #' @title GSVA function for single cell data or data.frame with expression value
 #' @param obj The count matrix, Seurat, or SingleCellExperiment object.
 #' @param annot annotation object
+#' @param assay Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)
 #' @param method to employ in the estimation of gene-set enrichment scores per
-#' sample. By default this is set to gsva
+#' sample. By default this is set to ssgsea, you can also set it as UCell if you would like use the UCell method
 #' @param kcdf Character string denoting the kernel to use during the
 #' non-parametric estimation of the cumulative distribution function of
-#' expression levels across samples when method="gsva".
+#' expression levels across samples when method="ssgsea".
 #' By default, kcdf="Poisson"
 #' @param abs.ranking Flag used only when mx.diff=TRUE.
 #' @param min.sz Minimum size of the resulting gene sets
@@ -26,6 +27,7 @@
 #' @importFrom Seurat as.Seurat
 #' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix summary
+#' @importFrom UCell ScoreSignatures_UCell
 #' @examples
 #' set.seed(123)
 #' library(scGSVA)
@@ -34,15 +36,17 @@
 #' res<-scgsva(pbmc_small,hsko)
 #' @author Kai Guo
 #' @export
-scgsva <- function(obj, annot = NULL,
+scgsva <- function(obj, annot = NULL, assay = NULL,
+                   batch = 1000,
                    method="ssgsea",kcdf="Poisson",
                    abs.ranking=FALSE,min.sz=1,
                    max.sz=Inf,
                    mx.diff=TRUE,
                    ssgsea.norm=TRUE,
                    useTerm=TRUE,
+                   BPPARAM = SnowParam(),
                    cores = 4,
-                   verbose=TRUE) {
+                   verbose=TRUE,...) {
     tau=switch(method, gsva=1, ssgsea=0.25, NA)
     if(is.null(annot)) {
         stop("Please provide annotation object or data.frame")
@@ -54,7 +58,8 @@ scgsva <- function(obj, annot = NULL,
         }
     }
     if (inherits(x = obj, what = "Seurat")) {
-        input <- obj@assays[["RNA"]]@counts
+        if(is.null(assay)) assay <- "RNA"
+        input <- obj@assays[[assay]]@counts
         input<- input[tabulate(summary(input)$i) != 0, , drop = FALSE]
         input <- as.matrix(input)
     } else if (inherits(x = obj, what = "SingleCellExperiment")) {
@@ -73,13 +78,34 @@ scgsva <- function(obj, annot = NULL,
     } else {
         input <- obj
     }
-    out<- .sgsva(input=input,annotation = annotation,method=method,kcdf=kcdf,
-                 abs.ranking=abs.ranking,
-                 min.sz=min.sz,
-                 max.sz=max.sz,cores=cores,
-                 tau=tau,ssgsea.norm=ssgsea.norm,
-                 verbose=verbose
-                 )
+    if(method == "UCell"){
+        out<- suppressWarnings(ScoreSignatures_UCell(input, features=annotation,
+                                                                chunk.size = batch, ncores = cores,
+                                                     BPPARAM=SerialParam(progressbar=verbose),...))
+        colnames(out)<-gsub(' ','\\.',sub('_UCell','',colnames(out)))
+        out<-as.data.frame(out)
+    }else{
+        if(ncol(obj) > batch){
+            split.data <- split.data.matrix(matrix=input, chunk.size=batch)
+            out<- lapply(split.data,function(x).sgsva(input=x,annotation = annotation,
+                                                      method=method,kcdf=kcdf,
+                     abs.ranking=abs.ranking,
+                     min.sz=min.sz,
+                     max.sz=max.sz,cores=cores,
+                     tau=tau,ssgsea.norm=ssgsea.norm,
+                     verbose=verbose
+        ))
+            out <- do.call(rbind,out)
+    }else{
+        out<- .sgsva(input=input,annotation = annotation, method=method,kcdf=kcdf,
+                     abs.ranking=abs.ranking,
+                     min.sz=min.sz,
+                     max.sz=max.sz,cores=cores,
+                     tau=tau,ssgsea.norm=ssgsea.norm,
+                     verbose=verbose
+        )
+    }
+    }
     annot <- annot[annot[,1]%in%rownames(input),]
     if(isTRUE(useTerm)){
       annot <- annot[order(annot[,3]),]
@@ -107,7 +133,7 @@ scgsva <- function(obj, annot = NULL,
                                    ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
                                    BPPARAM = SerialParam(progressbar=verbose)))
     #output <- data.frame(t(out))
-    output <- data.frame(t(out), check.names=FALSE) 
+    output <- data.frame(t(out), check.names=FALSE)
     return(output)
 }
 
