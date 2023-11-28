@@ -35,7 +35,6 @@ Imports:
     AnnotationDbi,
     viridis,
     rstatix,
-    UCell,
     testthat
 Encoding: UTF-8
 LazyData: yes
