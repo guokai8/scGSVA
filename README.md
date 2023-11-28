@@ -1,7 +1,7 @@
-# scGSVA: GSVA for single cell RNA seq analysis. 
+# scGSVA: GSVA for single-cell RNA seq analysis. Now support UCell scoring 
 # scGSVA [![Project Status:](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![](https://img.shields.io/badge/devel%20version-0.0.17-green.svg)](https://github.com/guokai8/scGSVA)  ![Code Size:](https://img.shields.io/github/languages/code-size/guokai8/scGSVA)
 ## Description
-_scGSVA_ provides wrap functions to do GSVA analysis for single cell data. And scGSVA includes functions to build annotation for almost all species. scGSVA also provides function to generate figures based on the GSVA results.
+_scGSVA_ provides wrap functions to do GSVA analysis for single-cell data. And scGSVA includes functions to build annotation for almost all species. scGSVA also provides functions to generate figures based on the GSVA results.
 
 _scGSVA_ provides functions to generate annotation data which can be used in the analysis.
 
@@ -47,21 +47,21 @@ Heatmap(res,group_by="groups")
 <img align="center" src = 'heat.jpg'  width=300 height=300>
 
 ```{r}
-## find significant pathways across groups
+## Find significant pathways across groups
 findPathway(res,group = "groups")
 sigPathway(res, group = "groups")
 ``` 
 ```{r}
-## extract specific pathways with expression value
+## Extract specific pathways with expression value
 genes(res, features = "Wnt.signaling.pathway")
 ```
 ## Note
-The _scGSVA_ package use the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development.
+The _scGSVA_ package uses the __GSVA__ package to do the GSVA analysis for the single cell data.  The package is still under development. 
 
 ## Contact information
 
 For any questions please contact guokai8@gmail.com or https://github.com/guokai8/scGSVA/issues
 
-## Recentky update
+## Recently update
 
-Try to do multiple p value correction within group wise other than overall. 
+Try to do multiple p-value corrections within group-wise other than overall. 
