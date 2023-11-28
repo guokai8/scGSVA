@@ -5,9 +5,11 @@ _scGSVA_ provides wrap functions to do GSVA analysis for single-cell data. And s
 
 _scGSVA_ provides functions to generate annotation data which can be used in the analysis.
 
-_Fixed some issues since there was a bug due to the KEGG annotation changed these days._
-_Add batch calculation when the cell population is huge
-_Add UCell function within the scgsva function
+_Fixed some issues since there was a bug due to the KEGG annotation changed these days._ 
+
+_Add batch calculation when the cell population is huge._ 
+
+_Add UCell function within the scgsva function._ 
 ## Installation
 ```
 library(devtools)
