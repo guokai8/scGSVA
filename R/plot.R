@@ -645,7 +645,6 @@ geom_split_violin <- function(
 #' @param features Name of the feature to visualize.
 #' @param images Name of the images to use in the plot(s)
 #' @param color Colors to use for identity class plotting
-#' @param group_by Name of one or more metadata columns to group (color) cells by
 #' @param label Name of one or more metadata columns to label the cells by
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
@@ -670,7 +669,7 @@ geom_split_violin <- function(
 #' @author Kai Guo
 #' @export
 spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
-                      group_by = NULL, label = NULL,
+                       label = NULL,
                       pt.size = 1, pt.shape = 19,
                       min.cutoff = NA, max.cutoff = NA,
                       nrow=NULL, ncol = NULL,
@@ -707,13 +706,9 @@ spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
             summarize(x = median(x), y = median(y))
 
     }
-    if(!is.null(group_by)){
-        gsva <- cbind(gsva, meta[rownames(gsva),group_by])
-        colnames(gsva)[ncol(gsva)] <- group_by
-    }
     if(length(features)>1){
-        if(!is.null(group_by)){
-            gsva <- gather(gsva, path, val, -1, -2, -ncol(gsva))
+        if(length(x = images) > 1){
+            gsva <- gather(gsva, path, val, -1, -2, -3)
         }else{
             gsva <- gather(gsva, path, val, -1, -2)
         }
@@ -745,14 +740,14 @@ spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
                                  size = label.size, color = label.color)
     }
     if(length(features) > 1){
-        if(!is.null(group_by)){
-            p <- p + facet_wrap(as.formula(paste0("path",'~',group_by)),ncol=ncol,nrow=nrow)
+        if(length(x = images) > 1){
+            p <- p + facet_wrap(as.formula(paste0("path",'~',"image")),ncol=ncol,nrow=nrow)
         }else{
             p <- p + facet_wrap(as.formula(paste0( '.~',"path")),ncol=ncol,nrow=nrow)
         }
     }else{
-        if(!is.null(group_by)){
-            p <- p + facet_wrap(as.formula(paste('.~',group_by)))
+        if(length(x = images) > 1){
+            p <- p + facet_wrap(as.formula(paste0('.~',"image")),ncol=ncol,nrow=nrow)
         }
     }
     p <- p + theme_classic(base_size=basesize) + labs(color="NES")+xlab("")+ylab("")
