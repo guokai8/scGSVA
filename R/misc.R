@@ -55,13 +55,13 @@ names.GSVA<-function(x,...){
   names(x@gsva)
 }
 
-##' @method row.names Annot
+##' @method row.names GSVA
 ##' @export
 row.names.GSVA<-function(x,...){
     row.names(x@gsva)
 }
 
-##' @method colnames Annot
+##' @method colnames GSVA
 ##' @export
 colnames.GSVA<-function(x,...){
     colnames(x@gsva)
@@ -98,7 +98,7 @@ dim.GSVA <- function(x) {
   x@annot[, name]
 }
 
-##' @method $ Annot
+##' @method $ GSVA
 ##' @export
 `$.GSVA` <-  function(x, name) {
   x@gsva[, name]
@@ -110,19 +110,6 @@ dim.GSVA <- function(x) {
   x@gsva[i,j]
 }
 
-##' @method [ GSVA
-##' @export
-`[<-.GSVA` <- function(x, i, j,..., value) {
-    x@gsva[i,j] <- value
-    return(x)
-}
-
-##' @method $ GSVA
-##' @export
-`$<-.GSVA` <-  function(x, name,..., value) {
-  x@gsva[,name] <- value
-  return(x)
-}
 #' @title subset the GSVA object
 ##' @method subset GSVA
 ##' @param x a GSVA object
