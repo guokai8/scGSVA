@@ -695,7 +695,7 @@ spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
 
     }else{
         coordinates <- GetTissueCoordinates(object = seu,images)
-        coordinates$image<-images
+        #coordinates$image<-images
     }
     gsva <-cbind(coordinates[rownames(gsva),],gsva)
     if(!is.null(label)){
