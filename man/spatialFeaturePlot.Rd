@@ -9,7 +9,6 @@ spatialFeaturePlot(
   features,
   images = NULL,
   color = NULL,
-  group_by = NULL,
   label = NULL,
   pt.size = 1,
   pt.shape = 19,
@@ -30,8 +29,6 @@ spatialFeaturePlot(
 \item{images}{Name of the images to use in the plot(s)}
 
 \item{color}{Colors to use for identity class plotting}
-
-\item{group_by}{Name of one or more metadata columns to group (color) cells by}
 
 \item{label}{Name of one or more metadata columns to label the cells by}
 
