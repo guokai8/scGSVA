@@ -27,7 +27,6 @@
 #' @importFrom Seurat as.Seurat
 #' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix summary
-#' @importFrom UCell ScoreSignatures_UCell
 #' @examples
 #' set.seed(123)
 #' library(scGSVA)

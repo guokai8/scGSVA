@@ -628,3 +628,63 @@ split.data.matrix <- function(matrix, chunk.size=1000) {
     }
     return(split.data)
 }
+
+# modified from https://github.com/satijalab/seurat/blob/41d19a8a55350bff444340d6ae7d7e03417d4173/R/utilities.R#L1701
+#' get the quantile of data
+#' @importFrom stats quantile
+#'
+#' @examples
+#' set.seed(42)
+#' get.quantile('q10', sample(1:100, 10))
+#'
+.get.quantile <- function(cutoff, data) {
+    if (grepl(pattern = '^q[0-9]{1,2}$', x = as.character(x = cutoff), perl = TRUE)) {
+        this.quantile <- as.numeric(x = sub(
+            pattern = 'q',
+            replacement = '',
+            x = as.character(x = cutoff)
+        )) / 100
+        data <- unlist(x = data)
+        data <- data[data > 0]
+        cutoff <- quantile(x = data, probs = this.quantile)
+    }
+    return(as.numeric(x = cutoff))
+}
+#'
+#' modified from Seurat github
+#' transform data with the min and max cutoff
+#' @param gsva GSVA result
+#' @param min.cutoff, max.cutoff Vector of minimum and maximum cutoff values for
+#' each feature, may specify quantile in the form of 'q##' where
+#' is the quantile (eg, 'q1', 'q10')
+#' @return data.frame
+set.cut.off<-function(gsva,min.cutoff=NA,max.cutoff=NA){
+    data <- gsva
+    features <- colnames(x = data)
+    min.cutoff <- mapply(FUN = function(cutoff, feature) {
+        return(ifelse(test = is.na(x = cutoff), yes = min(data[,
+                                                               feature]), no = cutoff))
+    }, cutoff = min.cutoff, feature = features)
+    max.cutoff <- mapply(FUN = function(cutoff, feature) {
+        return(ifelse(test = is.na(x = cutoff), yes = max(data[,
+                                                               feature]), no = cutoff))
+    }, cutoff = max.cutoff, feature = features)
+    check.lengths <- unique(x = vapply(X = list(features,
+                                                min.cutoff, max.cutoff), FUN = length, FUN.VALUE = numeric(length = 1)))
+    if (length(x = check.lengths) != 1) {
+        stop("There must be the same number of minimum and maximum cuttoffs as there are features")
+    }
+    data <- sapply(X = 1:ncol(x = data), FUN = function(index) {
+        data.feature <- as.vector(x = data[, index])
+        min.use <- .get.quantile(cutoff = min.cutoff[index],
+                                 data.feature)
+        max.use <- .get.quantile(cutoff = max.cutoff[index],
+                                 data.feature)
+        data.feature[data.feature < min.use] <- min.use
+        data.feature[data.feature > max.use] <- max.use
+        return(data.feature)
+    })
+    colnames(x = data) <- features
+    rownames(x = data) <- rownames(gsva)
+    return(as.data.frame(data))
+}

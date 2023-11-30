@@ -20,6 +20,9 @@
 #' specifying x- and y-dimensions
 #' @param pt.size Size of the points on the plot
 #' @param pt.shape If NULL, all points are circles (default)
+#' @param min.cutoff, max.cutoff Vector of minimum and maximum cutoff values for
+#' each feature, may specify quantile in the form of 'q##' where
+#' is the quantile (eg, 'q1', 'q10')
 #' @param nrow Number of rows
 #' @param ncol Number of columns
 #' @param basesize base font size, given in pts.
@@ -37,13 +40,15 @@
 featurePlot<-function(object, features, reduction = "umap", color = NULL,
                       group_by = NULL, label = NULL,
                       dims = c(1, 2), pt.size = 1, pt.shape = 19,
+                      min.cutoff = NA, max.cutoff = NA,
                       nrow=NULL, ncol = NULL,
                       basesize = 12,
                       label.size = 4, label.color="black"){
     seu <- object@obj
     meta <- seu@meta.data
     red <- Embeddings(seu,reduction)
-    gsva <- object@gsva[,features,drop=F]
+    gsva <- set.cut.off(object@gsva, min.cutoff = min.cutoff,max.cutoff = max.cutoff)
+    gsva <- gsva[,features,drop=F]
     gsva <-cbind(red[rownames(gsva),dims],gsva)
     if(!is.null(label)){
         df <- data.frame(text = meta[rownames(gsva),label],
@@ -620,4 +625,136 @@ geom_split_violin <- function(
             ...
         )
     ))
+}
+
+##### spatial feature plot
+#' @title Visualize 'Pathways or Terms' on a Spatial  plot
+#' @description Colors single cells on a spatial plot according to a
+#' 'pathways' (i.e. KEGG, GO terms)
+#' @importFrom viridis scale_color_viridis
+#' @importFrom dplyr group_by summarize
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot geom_point facet_wrap aes_string
+#' @importFrom ggplot2 scale_color_gradient aes theme_classic
+#' @importFrom ggrepel geom_text_repel
+#' @importFrom Seurat Embeddings
+#' @importFrom Seurat GetTissueCoordinates
+#' @importFrom tidyr gather
+#' @importFrom viridis scale_color_viridis
+#' @param object A GSVA objectect or data.frame
+#' @param features Name of the feature to visualize.
+#' @param images Name of the images to use in the plot(s)
+#' @param color Colors to use for identity class plotting
+#' @param group_by Name of one or more metadata columns to group (color) cells by
+#' @param label Name of one or more metadata columns to label the cells by
+#' @param pt.size Size of the points on the plot
+#' @param pt.shape If NULL, all points are circles (default)
+#' @param min.cutoff, max.cutoff Vector of minimum and maximum cutoff values for
+#' each feature, may specify quantile in the form of 'q##' where
+#' is the quantile (eg, 'q1', 'q10')
+#' @param nrow Number of rows
+#' @param ncol Number of columns
+#' @param basesize base font size, given in pts.
+#' @param label.size Sets the size of the labels
+#' @param label.color Sets the color of the label text
+#' @examples
+#' set.seed(123)
+#' library(scGSVA)
+#' library(Seurat)
+#' library(SeuratData)
+#' InstallData("stxBrain")
+#' brain <- LoadData("stxBrain", type = "anterior1")
+#' hsko<-buildAnnot(species="human",keytype="SYMBOL",anntype="KEGG")
+#' res<-scgsva(brain,hsko)
+#' spatialFeaturePlot(res,features="Wnt.signaling.pathway")
+#' @author Kai Guo
+#' @export
+spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
+                      group_by = NULL, label = NULL,
+                      pt.size = 1, pt.shape = 19,
+                      min.cutoff = NA, max.cutoff = NA,
+                      nrow=NULL, ncol = NULL,
+                      basesize = 12,
+                      label.size = 4, label.color="black"){
+    seu <- object@obj
+    meta <- seu@meta.data
+    gsva <- set.cut.off(object@gsva,min.cutoff = min.cutoff,max.cutoff = max.cutoff)
+    gsva <- gsva[,features,drop=F]
+    if (length(x = images) == 0) {
+        images <- Images(object = seu)
+    }
+    if (length(x = images) < 1) {
+        stop("Could not find any spatial image information")
+    }
+    if (length(x = images) > 1) {
+        coord <- lapply(images, function(x) {
+            tmp <- GetTissueCoordinates(object = seu,image=x)
+            tmp$image<-x
+            return(tmp)
+        })
+        coordinates<-do.call(rbind,coord)
+
+    }else{
+        coordinates <- GetTissueCoordinates(object = seu,images)
+        coordinates$image<-images
+    }
+    gsva <-cbind(coordinates[rownames(gsva),],gsva)
+    if(!is.null(label)){
+        df <- data.frame(text = meta[rownames(gsva),label],
+                         x = gsva[,1],y=gsva[,2])
+        df <- df %>%
+            group_by(text) %>%
+            summarize(x = median(x), y = median(y))
+
+    }
+    if(!is.null(group_by)){
+        gsva <- cbind(gsva, meta[rownames(gsva),group_by])
+        colnames(gsva)[ncol(gsva)] <- group_by
+    }
+    if(length(features)>1){
+        if(!is.null(group_by)){
+            gsva <- gather(gsva, path, val, -1, -2, -ncol(gsva))
+        }else{
+            gsva <- gather(gsva, path, val, -1, -2)
+        }
+    }
+    xlabel <- colnames(gsva)[1]
+    ylabel <- colnames(gsva)[2]
+    p<-ggplot(gsva, aes_string(x = xlabel,
+                               y = ylabel
+    ))
+    if(length(features)>1){
+        p <- p + geom_point(aes(color = val), size = pt.size,
+                            shape = pt.shape)
+    }else{
+        p <- p + geom_point(aes_string(color = features),
+                            size = pt.size, shape = pt.shape)
+    }
+
+    if(is.null(color)){
+        p <- p + scale_color_viridis()
+    }else{
+        if(length(color)==2){
+            p <- p + scale_color_gradient(low = color[1],high = color[2])
+        }else{
+            p <- p + scale_color_gradient(low = "white",high = color[1])
+        }
+    }
+    if(!is.null(label)){
+        p <- p + geom_text_repel(data = df,aes(x = x, y = y, label = text),
+                                 size = label.size, color = label.color)
+    }
+    if(length(features) > 1){
+        if(!is.null(group_by)){
+            p <- p + facet_wrap(as.formula(paste0("path",'~',group_by)),ncol=ncol,nrow=nrow)
+        }else{
+            p <- p + facet_wrap(as.formula(paste0( '.~',"path")),ncol=ncol,nrow=nrow)
+        }
+    }else{
+        if(!is.null(group_by)){
+            p <- p + facet_wrap(as.formula(paste('.~',group_by)))
+        }
+    }
+    p <- p + theme_classic(base_size=basesize) + labs(color="NES")+xlab("")+ylab("")
+    p
 }
