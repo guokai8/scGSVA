@@ -3,6 +3,7 @@
 #' @param obj The count matrix, Seurat, or SingleCellExperiment object.
 #' @param annot annotation object
 #' @param assay Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)
+#' @param slot Specific assay data to get or set
 #' @param method to employ in the estimation of gene-set enrichment scores per
 #' sample. By default this is set to ssgsea, you can also set it as UCell if you would like use the UCell method
 #' @param kcdf Character string denoting the kernel to use during the
@@ -24,7 +25,7 @@
 #' @importFrom SingleCellExperiment logcounts
 #' @importFrom SummarizedExperiment assays
 #' @importFrom Matrix colSums
-#' @importFrom Seurat as.Seurat
+#' @importFrom Seurat as.Seurat GetAssayData
 #' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix summary
 #' @examples
@@ -35,7 +36,7 @@
 #' res<-scgsva(pbmc_small,hsko)
 #' @author Kai Guo
 #' @export
-scgsva <- function(obj, annot = NULL, assay = NULL,
+scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    batch = 1000,
                    method="ssgsea",kcdf="Poisson",
                    abs.ranking=FALSE,min.sz=1,
@@ -58,7 +59,8 @@ scgsva <- function(obj, annot = NULL, assay = NULL,
     }
     if (inherits(x = obj, what = "Seurat")) {
         if(is.null(assay)) assay <- "RNA"
-        input <- obj@assays[[assay]]@counts
+       # input <- obj@assays[[assay]]@counts
+        input <- GetAssayData(obj,assay = assay, layer = slot)
         input<- input[tabulate(summary(input)$i) != 0, , drop = FALSE]
         input <- as.matrix(input)
     } else if (inherits(x = obj, what = "SingleCellExperiment")) {
