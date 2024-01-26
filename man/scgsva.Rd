@@ -8,6 +8,7 @@ scgsva(
   obj,
   annot = NULL,
   assay = NULL,
+  slot = "counts",
   batch = 1000,
   method = "ssgsea",
   kcdf = "Poisson",
@@ -29,6 +30,8 @@ scgsva(
 \item{annot}{annotation object}
 
 \item{assay}{Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)}
+
+\item{slot}{Specific assay data to get or set}
 
 \item{method}{to employ in the estimation of gene-set enrichment scores per
 sample. By default this is set to ssgsea, you can also set it as UCell if you would like use the UCell method}
