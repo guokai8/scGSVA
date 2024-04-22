@@ -9,11 +9,13 @@
 #' @param features A vector of features to extract
 #' @param useTerm use Term or use id (default: TRUE)
 #' @param with.expr extract the expression value or not (default: TRUE)
+#' @param assay Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)
+#' @param slot Specific assay data to get or set
 #' @return data.frame
 #' @export
 #' @author Kai Guo
 setGeneric("genes", function(object, features,  useTerm = TRUE,
-                            with.expr = TRUE)
+                            with.expr = TRUE,assay = NULL, slot = "counts")
     standardGeneric("genes"))
 
 #' @title gene method
@@ -22,6 +24,8 @@ setGeneric("genes", function(object, features,  useTerm = TRUE,
 #' @param features A vector of features to extract
 #' @param useTerm use Term or use id (default: TRUE)
 #' @param with.expr extract the expression value or not (default: TRUE)
+#' @param assay Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)
+#' @param slot Specific assay data to get or set
 #' @examples
 #' \dontrun{
 #' data(pbmc_small)
@@ -34,10 +38,12 @@ setGeneric("genes", function(object, features,  useTerm = TRUE,
 #' @author Kai Guo
 setMethod("genes", signature(object = "GSVA"),
           definition = function(object, features, useTerm = TRUE,
-                                with.expr = TRUE) {
+                                with.expr = TRUE,assay = NULL, slot = "counts") {
             annot <- object@annot
             exp <- object@obj
-            input <- exp@assays[["RNA"]]@counts
+            #input <- exp@assays[["RNA"]]@counts
+            if(is.null(assay)) assay <- "RNA"
+            input <- GetAssayData(exp,assay = assay, layer = slot)
             if(isTRUE(useTerm)){
                 if(grepl('\\.',features)){
                     features <- gsub('\\.',' ', features)
