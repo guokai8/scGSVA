@@ -4,7 +4,14 @@
 \alias{genes}
 \title{gene method}
 \usage{
-genes(object, features, useTerm = TRUE, with.expr = TRUE)
+genes(
+  object,
+  features,
+  useTerm = TRUE,
+  with.expr = TRUE,
+  assay = NULL,
+  slot = "counts"
+)
 }
 \arguments{
 \item{object}{GSVA object}
@@ -14,6 +21,10 @@ genes(object, features, useTerm = TRUE, with.expr = TRUE)
 \item{useTerm}{use Term or use id (default: TRUE)}
 
 \item{with.expr}{extract the expression value or not (default: TRUE)}
+
+\item{assay}{Assay to use in GSVA analysis ('RNA','SCT' or 'Spatial' if spatial transcriptomics)}
+
+\item{slot}{Specific assay data to get or set}
 }
 \value{
 data.frame
