@@ -1,7 +1,7 @@
 Package: scGSVA
 Type: Package
 Title: GSVA and UCell signature enrichment analysis for single cell RNA seq 
-Version: 0.0.20
+Version: 0.0.21
 Authors@R: c(person("Kai","Guo",email = "guokai8@gmail.com",
            role = c("aut", "cre")
           ),
