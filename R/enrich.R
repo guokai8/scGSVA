@@ -130,9 +130,34 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    replace_empty = TRUE,
                    verbose=TRUE){
     input <- input[rowSums(input > 0) != 0, ]
-    out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
-                                   ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
-                                   BPPARAM = SerialParam(progressbar=verbose)))
+
+    if (method == "gsva") {
+        param <- GSVA::gsvaParam(
+            input,
+            annotation,
+            minSize = min.sz,
+            maxSize = max.sz,
+            kcdf = kcdf,
+            tau = tau,
+            maxDiff = mx.diff,
+            absRanking = abs.ranking
+        )
+    } else if (method == "ssgsea") {
+        param <- GSVA::ssgseaParam(
+            input,
+            annotation,
+            normalize = ssgsea.norm,
+            alpha = tau,
+            minSize = min.sz,
+            maxSize = max.sz
+        )
+    }
+
+    out <- suppressWarnings(gsva(param, BPPARAM = SerialParam(progressbar=verbose)))
+
+    # out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
+    #                                ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
+    #                                BPPARAM = SerialParam(progressbar=verbose)))
     output <- data.frame(t(out))
     #output <- data.frame(t(out), check.names=FALSE)
     return(output)
