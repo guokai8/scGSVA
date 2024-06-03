@@ -26,7 +26,7 @@
 #' @importFrom SummarizedExperiment assays
 #' @importFrom Matrix colSums
 #' @importFrom Seurat as.Seurat GetAssayData
-#' @importFrom BiocParallel SerialParam
+#' @importFrom BiocParallel SerialParam MulticoreParam
 #' @importFrom Matrix summary
 #' @examples
 #' set.seed(123)
@@ -79,6 +79,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
     } else {
         input <- obj
     }
+    input <- input[rowSums(input > 0) != 0, ]
     if(method == "UCell"){
         out<- suppressWarnings(UCell::ScoreSignatures_UCell(input, features=annotation,
                                                                 chunk.size = batch, ncores = cores,
@@ -129,7 +130,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    ssgsea.norm=TRUE,
                    replace_empty = TRUE,
                    verbose=TRUE){
-    input <- input[rowSums(input > 0) != 0, ]
+   # input <- input[rowSums(input > 0) != 0, ]
 
     if (method == "gsva") {
         param <- GSVA::gsvaParam(
@@ -151,9 +152,32 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
             minSize = min.sz,
             maxSize = max.sz
         )
+    }else if(method == "plage"){
+        param <- GSVA::plageParam(
+            input,
+            annotation,
+            minSize = min.sz,
+            maxSize = max.sz
+        )
+    }else{
+        param <- GSVA::zscoreParam(
+            input,
+            annotation,
+            minSize = min.sz,
+            maxSize = max.sz
+        )
+    }
+    if(cores>1){
+        if (.Platform$OS.type=="windows") {
+            BPPARAM <- BiocParallel::SnowParam(cores,type="SOCK",progressbar=verbose)
+        } else {
+            BPPARAM <- BiocParallel::MulticoreParam(cores,progressbar=verbose)
+        }
+       out <- suppressWarnings(gsva(param, BPPARAM = BPPARAM))
+    }else{
+       out <- suppressWarnings(gsva(param, BPPARAM = SerialParam(progressbar=verbose)))
     }
 
-    out <- suppressWarnings(gsva(param, BPPARAM = SerialParam(progressbar=verbose)))
 
     # out<- suppressWarnings(gsva(input, annotation, method = method,kcdf = kcdf,tau=tau,
     #                                ssgsea.norm = ssgsea.norm,  parallel.sz = cores,
