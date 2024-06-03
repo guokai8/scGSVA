@@ -1,7 +1,7 @@
 Package: scGSVA
 Type: Package
 Title: GSVA and UCell signature enrichment analysis for single cell RNA seq 
-Version: 0.0.21
+Version: 0.0.22
 Authors@R: c(person("Kai","Guo",email = "guokai8@gmail.com",
            role = c("aut", "cre")
           ),
@@ -39,5 +39,5 @@ Imports:
 Encoding: UTF-8
 LazyData: yes
 LazyDataCompression: xz
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 biocViews: 
