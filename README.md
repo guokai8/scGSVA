@@ -12,6 +12,8 @@ _Add batch calculation when the cell population is huge._
 _Add UCell function within the scgsva function. Users need to install UCell by using BiocManager::install("UCell")._ 
 
 _Add spatialFeaturePlot function for spatial transcriptomics._
+
+_Fixed batch issues_
 ## Installation
 ```
 library(devtools)
