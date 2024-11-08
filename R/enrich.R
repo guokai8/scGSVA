@@ -15,16 +15,17 @@
 #' @param max.sz Maximum size of the resulting gene sets.
 #' @param mx.diff Offers two approaches to calculate the enrichment
 #' statistic (ES) from the KS random walk statistic.
-#' @param ssgsea.norm Logical, set to TRUE (default) with method="ssgsea"
+#' @param ssgsea.norm Logical, set to FALSE (default) since we used batch methods with method="ssgsea"
 #' runs the SSGSEA method
 #' @param useTerm use Term or use id (default: TRUE)
 #' @param cores The number of cores to use for parallelization.
 #' @param verbose Gives information about each calculation step. Default: FALSE.
+#' @param sc.keep keep the whole single cell data or not. Default: TRUE
 #' @importFrom GSVA gsva
 #' @importFrom SingleCellExperiment counts
 #' @importFrom SingleCellExperiment logcounts
 #' @importFrom SummarizedExperiment assays
-#' @importFrom Matrix colSums
+#' @importFrom Matrix colSums Matrix
 #' @importFrom Seurat as.Seurat GetAssayData
 #' @importFrom BiocParallel SerialParam MulticoreParam
 #' @importFrom Matrix summary
@@ -46,7 +47,8 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    useTerm=TRUE,
                    BPPARAM = SnowParam(),
                    cores = 4,
-                   verbose=TRUE,...) {
+                   verbose=TRUE,
+                   sc.keep=TRUE,...) {
     tau=switch(method, gsva=1, ssgsea=0.25, NA)
     if(is.null(annot)) {
         stop("Please provide annotation object or data.frame")
@@ -94,10 +96,15 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                      abs.ranking=abs.ranking,
                      min.sz=min.sz,
                      max.sz=max.sz,cores=cores,
-                     tau=tau,ssgsea.norm=ssgsea.norm,
+                     tau=tau,ssgsea.norm=FALSE,
                      verbose=verbose
         ))
             out <- do.call(rbind,out)
+            if(isTRUE(ssgsea.norm)){
+                rng <- range(out) ## na.rm increases execution time and memory consumption
+            if (any(is.na(rng) | !is.finite(rng))) rng <- range(out, na.rm=TRUE) ## discard always NA values to calculate the
+            out <- out[1:nrow(out),, drop=FALSE] / (rng[2] - rng[1])
+        }
     }else{
         out<- .sgsva(input=input,annotation = annotation, method=method,kcdf=kcdf,
                      abs.ranking=abs.ranking,
@@ -114,6 +121,14 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
       }else{
       annot <- annot[order(annot[,2]),]
       }
+    if (!isTRUE(sc.keep)) {
+        if (is.null(assay)) assay <- "RNA"
+        empty_counts <- Matrix(0, nrow = 0, ncol = 0, sparse = TRUE)
+        empty_counts <- as(as(empty_counts, "generalMatrix"), "CsparseMatrix")
+
+        # Assign the empty dgCMatrix to the counts slot in the RNA assay
+        obj <- SetAssayData(object = obj, assay = "RNA", layer = "counts", new.data = empty_counts)
+    }
     res<-new("GSVA",
              obj=obj,
              gsva=out,
