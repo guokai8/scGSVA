@@ -123,7 +123,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
       }
     if (!isTRUE(sc.keep)) {
         if (is.null(assay)) assay <- "RNA"
-        empty_counts <- Matrix(0, nrow = 0, ncol = 0, sparse = TRUE)
+        empty_counts <- Matrix::Matrix(0, nrow = 0, ncol = 0, sparse = TRUE)
         empty_counts <- as(as(empty_counts, "generalMatrix"), "CsparseMatrix")
 
         # Assign the empty dgCMatrix to the counts slot in the RNA assay
