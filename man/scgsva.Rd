@@ -21,6 +21,7 @@ scgsva(
   BPPARAM = SnowParam(),
   cores = 4,
   verbose = TRUE,
+  sc.keep=TRUE,
   ...
 )
 }
@@ -56,6 +57,8 @@ runs the SSGSEA method}
 \item{useTerm}{use Term or use id (default: TRUE)}
 
 \item{cores}{The number of cores to use for parallelization.}
+
+\item{sc.keep}{keep the whole single cell data or not. Default: TRUE.}
 
 \item{verbose}{Gives information about each calculation step. Default: FALSE.}
 }
