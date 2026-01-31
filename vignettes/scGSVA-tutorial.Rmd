@@ -1,0 +1,540 @@
+---
+title: "scGSVA: Complete Tutorial"
+author: "Kai Guo"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{scGSVA: Complete Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+**scGSVA** is an R package for performing Gene Set Variation Analysis (GSVA) and UCell enrichment analysis on single-cell RNA-seq data. This tutorial covers all major functions in the package.
+
+### Key Features
+
+- Multiple enrichment methods: GSVA, ssGSEA, and UCell
+- Flexible annotation building for KEGG, GO, and MSigDB
+- Support for 20+ species
+- Rich visualization options
+- Statistical testing for differential pathway analysis
+- Spatial transcriptomics support
+
+## Installation
+
+```{r install, eval=FALSE}
+# Install from GitHub
+library(devtools)
+install_github("guokai8/scGSVA")
+
+# For UCell support (optional)
+BiocManager::install("UCell")
+```
+
+## Load Package and Data
+
+```{r load}
+library(scGSVA)
+set.seed(123)
+
+# Load example data
+data(pbmcs)
+pbmcs
+```
+
+---
+
+## Part 1: Building Annotations
+
+scGSVA provides functions to build gene set annotations from various databases.
+
+### 1.1 Check Supported Species
+
+Use `showData()` to see all supported species:
+
+```{r showdata, eval=FALSE}
+# Show supported species
+showData()
+```
+
+### 1.2 Build KEGG Annotations
+
+```{r kegg}
+# Build KEGG pathway annotations for human
+hsko <- buildAnnot(species = "human", keytype = "SYMBOL", anntype = "KEGG")
+
+# View the annotation object
+head(hsko)
+dim(hsko)
+```
+
+### 1.3 Build GO Annotations
+
+```{r go, eval=FALSE}
+# Build GO annotations (Biological Process)
+hsgo <- buildAnnot(species = "human", keytype = "SYMBOL", anntype = "GO")
+```
+
+### 1.4 Build MSigDB Annotations
+
+Use `msigdbinfo()` to see available MSigDB categories:
+
+```{r msigdbinfo, eval=FALSE}
+# Show MSigDB categories
+msigdbinfo()
+```
+
+Build MSigDB gene sets:
+
+```{r msigdb, eval=FALSE}
+# Hallmark gene sets
+hallmark <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "HALLMARK")
+
+# KEGG pathways from MSigDB
+msig_kegg <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "KEGG")
+
+# REACTOME pathways
+reactome <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "REACTOME")
+
+# GO Biological Process
+go_bp <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "BP")
+
+# GO Cellular Component
+go_cc <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "CC")
+
+# GO Molecular Function
+go_mf <- buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "MF")
+```
+
+Available `anntype` values for `buildMSIGDB()`:
+
+| anntype | Description |
+|---------|-------------|
+| HALLMARK | Hallmark gene sets (H) |
+| KEGG | KEGG pathways (C2) |
+| REACTOME | Reactome pathways (C2) |
+| BIOCARTA | BioCarta pathways (C2) |
+| GO | All GO terms (C5) |
+| BP | GO Biological Process (C5) |
+| CC | GO Cellular Component (C5) |
+| MF | GO Molecular Function (C5) |
+| CGP | Chemical and genetic perturbations (C2) |
+| MIR | microRNA targets (C3) |
+| TFT | Transcription factor targets (C3) |
+
+### 1.5 Offline Usage for MSigDB (China/Network Issues)
+
+If you cannot connect to Zenodo (common in China), you can download the MSigDB file manually and use it offline:
+
+```{r offline_msigdb, eval=FALSE}
+# Step 1: Download the file manually (use VPN or mirror if needed)
+# Human: https://zenodo.org/records/15800824/files/msigdb.2025.1.Hs.rds
+# Mouse: https://zenodo.org/records/15800824/files/msigdb.2025.1.Mm.rds
+
+# Step 2: Load the downloaded file
+msig_data <- readRDS("path/to/msigdb.2025.1.Hs.rds")
+
+# Step 3: Use the pre-loaded data
+hallmark <- buildMSIGDB(species = "human", keytype = "SYMBOL",
+                        anntype = "HALLMARK", msigdb_data = msig_data)
+
+# You can reuse msig_data for different annotation types
+reactome <- buildMSIGDB(species = "human", keytype = "SYMBOL",
+                        anntype = "REACTOME", msigdb_data = msig_data)
+```
+
+---
+
+## Part 2: Running Enrichment Analysis
+
+### 2.1 GSVA/ssGSEA Method
+
+The main function `scgsva()` performs enrichment analysis:
+
+```{r scgsva}
+# Run ssGSEA (default method)
+res <- scgsva(pbmcs, hsko, method = "ssgsea")
+
+# View results
+res
+head(res$gsva[, 1:5])
+```
+
+Key parameters for `scgsva()`:
+
+| Parameter | Description |
+|-----------|-------------|
+| `obj` | Seurat or SingleCellExperiment object |
+| `annot` | Annotation object from buildAnnot/buildMSIGDB |
+| `method` | "gsva", "ssgsea", or "UCell" |
+| `assay` | Assay to use ("RNA", "SCT", "Spatial") |
+| `batch` | Chunk size for batch processing (default: 1000) |
+| `maxRank` | Max genes to rank for UCell (default: 1500) |
+
+### 2.2 UCell Method
+
+UCell is a rank-based method that's robust and fast:
+
+```{r ucell, eval=FALSE}
+# Run UCell with custom maxRank
+res_ucell <- scgsva(pbmcs, hsko, method = "UCell", maxRank = 3000)
+```
+
+### 2.3 Batch Processing for Large Datasets
+
+For large datasets, use batch processing:
+
+```{r batch, eval=FALSE}
+# Process in chunks of 500 cells
+res_large <- scgsva(large_seurat, hsko, method = "ssgsea", batch = 500)
+```
+
+---
+
+## Part 3: Visualization
+
+scGSVA provides multiple visualization functions for exploring enrichment results.
+
+### 3.1 Violin Plot
+
+```{r vlnplot, fig.width=6, fig.height=4}
+# Basic violin plot
+vlnPlot(res, features = "Wnt.signaling.pathway", group_by = "groups")
+```
+
+```{r vlnplot_split, eval=FALSE}
+# Split violin plot by condition
+vlnPlot(res, features = "Wnt.signaling.pathway",
+        group_by = "seurat_clusters",
+        split.plot = TRUE, split.by = "groups")
+```
+
+### 3.2 Dot Plot
+
+```{r dotplot, fig.width=7, fig.height=5}
+# Dot plot for multiple pathways
+dotPlot(res, features = c("Wnt.signaling.pathway",
+                          "MAPK.signaling.pathway",
+                          "Cell.cycle"),
+        group_by = "groups")
+```
+
+### 3.3 Ridge Plot
+
+```{r ridgeplot, fig.width=6, fig.height=4}
+# Ridge plot showing distribution
+ridgePlot(res, features = "Wnt.signaling.pathway", group_by = "groups")
+```
+
+### 3.4 Feature Plot (UMAP/tSNE)
+
+```{r featureplot, fig.width=7, fig.height=5}
+# Overlay enrichment scores on dimensionality reduction
+featurePlot(res, features = "Wnt.signaling.pathway", reduction = "tsne")
+```
+
+```{r featureplot_split, eval=FALSE}
+# Split by group
+featurePlot(res, features = "Wnt.signaling.pathway",
+            reduction = "umap", split.by = "groups")
+```
+
+### 3.5 Heatmap
+
+```{r heatmap, fig.width=8, fig.height=6}
+# Heatmap of top pathways
+Heatmap(res, group_by = "groups", n = 20)
+```
+
+### 3.6 Bar Plot
+
+```{r barplot, fig.width=7, fig.height=5}
+# Bar plot comparing groups
+barPlot(res, features = c("Wnt.signaling.pathway", "MAPK.signaling.pathway"),
+        group_by = "groups", show.error = TRUE)
+```
+
+```{r barplot_horizontal, fig.width=7, fig.height=4}
+# Horizontal bar plot
+barPlot(res, features = "Wnt.signaling.pathway",
+        group_by = "groups", horizontal = TRUE)
+```
+
+### 3.7 Lollipop Plot
+
+```{r lollipop, fig.width=6, fig.height=4}
+# Lollipop plot
+lollipopPlot(res, features = "Wnt.signaling.pathway",
+             group_by = "groups", pt.size = 5)
+```
+
+```{r lollipop_multi, fig.width=8, fig.height=5}
+# Multiple pathways
+lollipopPlot(res, features = c("Wnt.signaling.pathway",
+                               "MAPK.signaling.pathway",
+                               "Cell.cycle"),
+             group_by = "groups", ncol = 3)
+```
+
+### 3.8 Spatial Feature Plot
+
+For spatial transcriptomics data:
+
+```{r spatial, eval=FALSE}
+# Load spatial data
+library(SeuratData)
+brain <- LoadData("stxBrain", type = "anterior1")
+
+# Run enrichment
+res_spatial <- scgsva(brain, hsko, assay = "Spatial")
+
+# Visualize on tissue
+spatialFeaturePlot(res_spatial, features = "Wnt.signaling.pathway")
+```
+
+---
+
+## Part 4: Statistical Analysis
+
+### 4.1 Differential Pathway Analysis with limma
+
+`findPathway()` uses linear models to identify differentially enriched pathways:
+
+```{r findpathway}
+# Find differential pathways between groups
+diff_pathways <- findPathway(res, group = "groups")
+head(diff_pathways)
+```
+
+The output includes:
+
+| Column | Description |
+|--------|-------------|
+| `logFC` | Log fold change |
+| `AveExpr` | Average expression |
+| `t` | t-statistic |
+| `P.Value` | Raw p-value |
+| `adj.P.Val` | Adjusted p-value (BH) |
+
+### 4.2 Statistical Tests with sigPathway
+
+`sigPathway()` performs statistical tests between groups:
+
+```{r sigpathway_wilcox}
+# Wilcoxon test (default)
+sig_wilcox <- sigPathway(res, group = "groups", test.use = "wilcox")
+head(sig_wilcox)
+```
+
+```{r sigpathway_ttest, eval=FALSE}
+# t-test
+sig_ttest <- sigPathway(res, group = "groups", test.use = "t.test")
+
+# ANOVA (for multiple groups)
+sig_anova <- sigPathway(res, group = "groups", test.use = "anova")
+```
+
+---
+
+## Part 5: Extracting Pathway Information
+
+### 5.1 Extract Genes in a Pathway
+
+Use `genes()` to get all genes in a pathway with their expression:
+
+```{r genes}
+# Get genes in Wnt signaling pathway
+wnt_genes <- genes(res, features = "Wnt.signaling.pathway")
+head(wnt_genes[, 1:6])
+```
+
+### 5.2 Top Influential Genes
+
+Use `topGenes()` to find genes most influencing pathway scores:
+
+```{r topgenes}
+# Get top 10 influential genes
+top10 <- topGenes(res, features = "Wnt.signaling.pathway", n = 10)
+top10
+```
+
+```{r topgenes_group}
+# With group-wise statistics
+top10_grouped <- topGenes(res, features = "Wnt.signaling.pathway",
+                          n = 10, group = "groups")
+top10_grouped
+```
+
+### 5.3 Summary Statistics
+
+Use `summaryPathway()` to get summary statistics across groups:
+
+```{r summary}
+# Summary for specific pathways
+pathway_summary <- summaryPathway(res,
+                                  features = c("Wnt.signaling.pathway",
+                                               "MAPK.signaling.pathway"),
+                                  group_by = "groups")
+pathway_summary
+```
+
+```{r summary_all, eval=FALSE}
+# Summary for all pathways with additional statistics
+full_summary <- summaryPathway(res, group_by = "groups",
+                               stats = c("mean", "median", "sd", "min", "max", "n"))
+```
+
+---
+
+## Part 6: Working with GSVA Objects
+
+### 6.1 Accessing GSVA Object Components
+
+```{r access}
+# Get enrichment scores matrix
+scores <- res$gsva
+dim(scores)
+
+# Get the Seurat object
+seurat_obj <- res$obj
+
+# Get annotation used
+annot <- res$annot
+```
+
+### 6.2 Subsetting GSVA Objects
+
+```{r subset}
+# Subset by pathways
+res_subset <- subset(res, features = c("Wnt.signaling.pathway",
+                                       "MAPK.signaling.pathway"))
+
+# Convert to data.frame
+df <- as.data.frame(res)
+head(df[, 1:5])
+```
+
+### 6.3 Basic Operations
+
+```{r operations}
+# Get dimensions
+dim(res)
+
+# Get pathway names
+head(colnames(res))
+
+# Get cell names
+head(rownames(res))
+```
+
+---
+
+## Part 7: Advanced Usage
+
+### 7.1 Custom Color Palettes
+
+```{r colors, eval=FALSE}
+# Use built-in color palettes
+vlnPlot(res, features = "Wnt.signaling.pathway",
+        group_by = "groups", color = distcolor[1:2])
+
+# Use custom colors
+my_colors <- c("#E41A1C", "#377EB8", "#4DAF4A")
+barPlot(res, features = "Wnt.signaling.pathway",
+        group_by = "groups", color = my_colors)
+```
+
+### 7.2 ID Conversion
+
+Convert gene IDs between different types:
+
+```{r idconvert, eval=FALSE}
+# Convert ENSEMBL to SYMBOL
+converted <- idconvert(species = "human",
+                       keys = c("ENSG00000141510", "ENSG00000171862"),
+                       from = "ENSEMBL", to = "SYMBOL")
+```
+
+### 7.3 Combining Multiple Analyses
+
+```{r combine, eval=FALSE}
+# Run multiple annotation types
+kegg_res <- scgsva(pbmcs, hsko, method = "ssgsea")
+hallmark_res <- scgsva(pbmcs, hallmark, method = "ssgsea")
+
+# Compare results
+kegg_diff <- findPathway(kegg_res, group = "groups")
+hallmark_diff <- findPathway(hallmark_res, group = "groups")
+```
+
+---
+
+## Function Reference
+
+### Annotation Building
+
+| Function | Description |
+|----------|-------------|
+| `buildAnnot()` | Build KEGG/GO annotations |
+| `buildMSIGDB()` | Build MSigDB gene sets |
+| `showData()` | Show supported species |
+| `msigdbinfo()` | Show MSigDB categories |
+| `idconvert()` | Convert gene IDs |
+
+### Enrichment Analysis
+
+| Function | Description |
+|----------|-------------|
+| `scgsva()` | Run GSVA/ssGSEA/UCell analysis |
+
+### Visualization
+
+| Function | Description |
+|----------|-------------|
+| `vlnPlot()` | Violin plot |
+| `dotPlot()` | Dot plot |
+| `ridgePlot()` | Ridge/density plot |
+| `featurePlot()` | UMAP/tSNE overlay |
+| `Heatmap()` | Heatmap |
+| `barPlot()` | Bar plot with error bars |
+| `lollipopPlot()` | Lollipop plot |
+| `spatialFeaturePlot()` | Spatial visualization |
+
+### Statistical Analysis
+
+| Function | Description |
+|----------|-------------|
+| `findPathway()` | Differential analysis (limma) |
+| `sigPathway()` | Statistical tests (t/Wilcox/ANOVA) |
+
+### Utility Functions
+
+| Function | Description |
+|----------|-------------|
+| `genes()` | Extract pathway genes |
+| `topGenes()` | Top influential genes |
+| `summaryPathway()` | Summary statistics |
+
+---
+
+## Session Info
+
+```{r sessioninfo}
+sessionInfo()
+```
