@@ -109,13 +109,24 @@ buildAnnot<-function(species = "human", keytype = "SYMBOL", anntype = "GO",
 ##' @param keytype the gene ID type
 ##' @param anntype anntotaion type of  gene set (GO,BP,CC,MF,KEGG,REACTOME,
 ##' BIOCARTA,HALLMARK)
+##' @param msigdb_data Optional: pre-loaded msigdbr data frame. Use this if you
+##' cannot connect to Zenodo (e.g., in China). You can download the data manually
+##' and load it with readRDS(), then pass it to this parameter.
 ##' @examples
 ##' \dontrun{
 ##' hsamsi<-buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
+##'
+##' # If you cannot connect to Zenodo, download the file manually:
+##' # 1. Download from: https://zenodo.org/records/15800824/files/msigdb.2025.1.Hs.rds
+##' # 2. Load and use:
+##' # msig_data <- readRDS("msigdb.2025.1.Hs.rds")
+##' # hallmark <- buildMSIGDB(species = "human", keytype = "SYMBOL",
+##' #                         anntype = "HALLMARK", msigdb_data = msig_data)
 ##' }
 ##' @export
 ##' @author Kai Guo
-buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO"){
+buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO",
+                      msigdb_data=NULL){
   flag <- 0
   anntypes <- NULL
   if(!is.null(anntype)){
@@ -181,11 +192,36 @@ buildMSIGDB<-function(species="human",keytype="SYMBOL",anntype="GO"){
     key = "entrez_gene"
     flag = 1
   }
-  cat("Downloading msigdb datasets ...\n")
-  res <- msigdbr(species = mspe)
-  res <- subset(res, gs_cat == category)
+
+  # Use pre-loaded data or download from msigdbr
+
+if(!is.null(msigdb_data)){
+    cat("Using pre-loaded MSigDB data ...\n")
+    res <- msigdb_data
+  } else {
+    cat("Downloading msigdb datasets ...\n")
+    cat("(If download fails, see ?buildMSIGDB for offline usage)\n")
+    res <- tryCatch({
+      msigdbr(species = mspe)
+    }, error = function(e) {
+      stop(paste0(
+        "Failed to download MSigDB data. This may be due to network issues.\n",
+        "Error: ", e$message, "\n\n",
+        "SOLUTION for users in China or with network restrictions:\n",
+        "1. Download the MSigDB file manually from a mirror or using VPN:\n",
+        "   Human: https://zenodo.org/records/15800824/files/msigdb.2025.1.Hs.rds\n",
+        "   Mouse: https://zenodo.org/records/15800824/files/msigdb.2025.1.Mm.rds\n",
+        "2. Load the file in R:\n",
+        "   msig_data <- readRDS('msigdb.2025.1.Hs.rds')\n",
+        "3. Pass it to buildMSIGDB:\n",
+        "   result <- buildMSIGDB(species='human', anntype='HALLMARK', msigdb_data=msig_data)\n"
+      ))
+    })
+  }
+
+  res <- subset(res, gs_collection == category)
   if(!is.null(anntypes)){
-    res <- subset(res, gs_subcat == anntypes)
+    res <- subset(res, gs_subcollection == anntypes)
   }
   if(anntype%in%c("GO", "BP", "CC", "MF")){
     res <- res[, c(key, "gs_exact_source", "gs_name")]

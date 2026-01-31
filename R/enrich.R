@@ -18,6 +18,7 @@
 #' @param ssgsea.norm Logical, set to FALSE (default) since we used batch methods with method="ssgsea"
 #' runs the SSGSEA method
 #' @param useTerm use Term or use id (default: TRUE)
+#' @param maxRank Maximum number of genes to rank per cell (UCell method only). Default: 1500
 #' @param cores The number of cores to use for parallelization.
 #' @param verbose Gives information about each calculation step. Default: FALSE.
 #' @param sc.keep keep the whole single cell data or not. Default: TRUE
@@ -45,6 +46,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    mx.diff=TRUE,
                    ssgsea.norm=TRUE,
                    useTerm=TRUE,
+                   maxRank=1500,
                    BPPARAM = SnowParam(),
                    cores = 4,
                    verbose=TRUE,
@@ -85,6 +87,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
     if(method == "UCell"){
         out<- suppressWarnings(UCell::ScoreSignatures_UCell(input, features=annotation,
                                                                 chunk.size = batch, ncores = cores,
+                                                                maxRank = maxRank,
                                                      BPPARAM=SerialParam(progressbar=verbose),...))
         colnames(out)<-gsub(' ','\\.',sub('_UCell','',colnames(out)))
         out<-as.data.frame(out)

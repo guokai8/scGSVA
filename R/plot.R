@@ -753,3 +753,258 @@ spatialFeaturePlot<-function(object, features, images = NULL,color = NULL,
     p <- p + theme_classic(base_size=basesize) + labs(color="NES")+xlab("")+ylab("")
     p
 }
+
+#' @title Bar plot for pathway enrichment scores
+#' @description Creates a bar plot showing mean enrichment scores across groups
+#' @importFrom ggplot2 ggplot aes aes_string geom_bar geom_errorbar
+#' @importFrom ggplot2 position_dodge theme_classic theme element_text
+#' @importFrom ggplot2 scale_fill_manual xlab ylab labs coord_flip facet_wrap
+#' @importFrom dplyr group_by summarise
+#' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom stats sd
+#' @param object A GSVA object or data.frame
+#' @param features A vector of features (pathways) to plot
+#' @param group_by Name of metadata column to group cells by
+#' @param color Colors to use for groups
+#' @param show.error Show error bars (standard error, default: TRUE)
+#' @param horizontal Plot bars horizontally (default: FALSE)
+#' @param nrow Number of rows for faceting
+#' @param ncol Number of columns for faceting
+#' @param basesize Base font size
+#' @examples
+#' \dontrun{
+#' data(pbmc_small)
+#' hsko <- buildAnnot(species="human", keytype="SYMBOL", anntype="KEGG")
+#' res <- scgsva(pbmc_small, hsko)
+#' barPlot(res, features = c("Wnt.signaling.pathway"), group_by = "groups")
+#' }
+#' @author Kai Guo
+#' @export
+barPlot <- function(object, features, group_by = NULL, color = NULL,
+                    show.error = TRUE, horizontal = FALSE,
+                    nrow = NULL, ncol = NULL, basesize = 12) {
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@obj
+        gsva <- object@gsva[, features, drop = FALSE]
+        meta <- seu@meta.data
+        if (is.null(group_by)) {
+            group_by <- "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+    } else {
+        gsva <- object[, features, drop = FALSE]
+        gsva <- cbind(gsva, group = group_by)
+    }
+
+    if (is.null(color)) {
+        color <- distcolor[seq_len(length(unique(gsva$group)))]
+    }
+
+    # Reshape data for multiple features
+    if (length(features) > 1) {
+        gsva <- gather(gsva, pathway, value, -group)
+    } else {
+        colnames(gsva)[1] <- "value"
+        gsva$pathway <- features
+    }
+
+    # Calculate summary statistics
+    summary_data <- gsva %>%
+        group_by(group, pathway) %>%
+        summarise(
+            mean = mean(value, na.rm = TRUE),
+            se = sd(value, na.rm = TRUE) / sqrt(n()),
+            .groups = "drop"
+        )
+
+    p <- ggplot(summary_data, aes(x = group, y = mean, fill = group)) +
+        geom_bar(stat = "identity", position = position_dodge(width = 0.9), width = 0.8)
+
+    if (show.error) {
+        p <- p + geom_errorbar(
+            aes(ymin = mean - se, ymax = mean + se),
+            position = position_dodge(width = 0.9),
+            width = 0.25
+        )
+    }
+
+    p <- p + scale_fill_manual(values = color) +
+        theme_classic(base_size = basesize) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+        xlab("") + ylab("Mean Enrichment Score") +
+        labs(fill = group_by)
+
+    if (length(features) > 1) {
+        p <- p + facet_wrap(~ pathway, nrow = nrow, ncol = ncol, scales = "free_y")
+    } else {
+        p <- p + labs(title = features)
+    }
+
+    if (horizontal) {
+        p <- p + coord_flip()
+    }
+
+    p
+}
+
+#' @title Lollipop plot for pathway enrichment scores
+#' @description Creates a lollipop plot showing mean enrichment scores across groups
+#' @importFrom ggplot2 ggplot aes aes_string geom_segment geom_point
+#' @importFrom ggplot2 theme_classic theme element_text element_blank
+#' @importFrom ggplot2 scale_color_manual xlab ylab labs coord_flip facet_wrap
+#' @importFrom dplyr group_by summarise arrange mutate
+#' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @param object A GSVA object or data.frame
+#' @param features A vector of features (pathways) to plot
+#' @param group_by Name of metadata column to group cells by
+#' @param color Colors to use for groups
+#' @param pt.size Size of the points
+#' @param horizontal Plot horizontally (default: TRUE)
+#' @param order.by Order bars by value (default: TRUE)
+#' @param nrow Number of rows for faceting
+#' @param ncol Number of columns for faceting
+#' @param basesize Base font size
+#' @examples
+#' \dontrun{
+#' data(pbmc_small)
+#' hsko <- buildAnnot(species="human", keytype="SYMBOL", anntype="KEGG")
+#' res <- scgsva(pbmc_small, hsko)
+#' lollipopPlot(res, features = c("Wnt.signaling.pathway"), group_by = "groups")
+#' }
+#' @author Kai Guo
+#' @export
+lollipopPlot <- function(object, features, group_by = NULL, color = NULL,
+                         pt.size = 4, horizontal = TRUE, order.by = TRUE,
+                         nrow = NULL, ncol = NULL, basesize = 12) {
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@obj
+        gsva <- object@gsva[, features, drop = FALSE]
+        meta <- seu@meta.data
+        if (is.null(group_by)) {
+            group_by <- "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+    } else {
+        gsva <- object[, features, drop = FALSE]
+        gsva <- cbind(gsva, group = group_by)
+    }
+
+    if (is.null(color)) {
+        color <- distcolor[seq_len(length(unique(gsva$group)))]
+    }
+
+    # Reshape data for multiple features
+    if (length(features) > 1) {
+        gsva <- gather(gsva, pathway, value, -group)
+    } else {
+        colnames(gsva)[1] <- "value"
+        gsva$pathway <- features
+    }
+
+    # Calculate summary statistics
+    summary_data <- gsva %>%
+        group_by(group, pathway) %>%
+        summarise(mean = mean(value, na.rm = TRUE), .groups = "drop")
+
+    if (order.by) {
+        summary_data <- summary_data %>%
+            arrange(pathway, mean) %>%
+            mutate(group = factor(group, levels = unique(group)))
+    }
+
+    p <- ggplot(summary_data, aes(x = group, y = mean, color = group)) +
+        geom_segment(aes(x = group, xend = group, y = 0, yend = mean), size = 1) +
+        geom_point(size = pt.size) +
+        scale_color_manual(values = color) +
+        theme_classic(base_size = basesize) +
+        theme(
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+            panel.grid.major.y = element_blank()
+        ) +
+        xlab("") + ylab("Mean Enrichment Score") +
+        labs(color = group_by)
+
+    if (length(features) > 1) {
+        p <- p + facet_wrap(~ pathway, nrow = nrow, ncol = ncol, scales = "free")
+    } else {
+        p <- p + labs(title = features)
+    }
+
+    if (horizontal) {
+        p <- p + coord_flip()
+    }
+
+    p
+}
+
+#' @title Summary statistics for pathways across groups
+#' @description Calculates summary statistics (mean, median, sd, etc.) for
+#' pathway enrichment scores across different groups
+#' @importFrom dplyr group_by summarise across n
+#' @importFrom tidyr gather pivot_wider
+#' @importFrom magrittr %>%
+#' @importFrom stats median sd quantile
+#' @param object A GSVA object or data.frame
+#' @param features A vector of features (pathways) to summarize. If NULL, all pathways are used.
+#' @param group_by Name of metadata column to group cells by
+#' @param stats Statistics to calculate: "mean", "median", "sd", "min", "max", "pct25", "pct75"
+#' @return A data.frame with summary statistics
+#' @examples
+#' \dontrun{
+#' data(pbmc_small)
+#' hsko <- buildAnnot(species="human", keytype="SYMBOL", anntype="KEGG")
+#' res <- scgsva(pbmc_small, hsko)
+#' summaryPathway(res, features = c("Wnt.signaling.pathway"), group_by = "groups")
+#' }
+#' @author Kai Guo
+#' @export
+summaryPathway <- function(object, features = NULL, group_by = NULL,
+                           stats = c("mean", "median", "sd", "n")) {
+    if (inherits(x = object, what = "GSVA")) {
+        seu <- object@obj
+        if (is.null(features)) {
+            gsva <- object@gsva
+            features <- colnames(gsva)
+        } else {
+            gsva <- object@gsva[, features, drop = FALSE]
+        }
+        meta <- seu@meta.data
+        if (is.null(group_by)) {
+            group_by <- "seurat_clusters"
+        }
+        gsva$group <- meta[rownames(gsva), group_by]
+    } else {
+        if (is.null(features)) {
+            gsva <- object
+            features <- colnames(gsva)
+        } else {
+            gsva <- object[, features, drop = FALSE]
+        }
+        gsva <- cbind(gsva, group = group_by)
+    }
+
+    # Reshape to long format
+    gsva_long <- gather(gsva, pathway, value, -group)
+
+    # Calculate requested statistics
+    result <- gsva_long %>%
+        group_by(group, pathway) %>%
+        summarise(
+            mean = if ("mean" %in% stats) mean(value, na.rm = TRUE) else NA,
+            median = if ("median" %in% stats) median(value, na.rm = TRUE) else NA,
+            sd = if ("sd" %in% stats) sd(value, na.rm = TRUE) else NA,
+            min = if ("min" %in% stats) min(value, na.rm = TRUE) else NA,
+            max = if ("max" %in% stats) max(value, na.rm = TRUE) else NA,
+            pct25 = if ("pct25" %in% stats) quantile(value, 0.25, na.rm = TRUE) else NA,
+            pct75 = if ("pct75" %in% stats) quantile(value, 0.75, na.rm = TRUE) else NA,
+            n = if ("n" %in% stats) n() else NA,
+            .groups = "drop"
+        )
+
+    # Remove columns that weren't requested
+    result <- result[, c("group", "pathway", stats)]
+
+    as.data.frame(result)
+}
