@@ -18,10 +18,11 @@ scgsva(
   mx.diff = TRUE,
   ssgsea.norm = TRUE,
   useTerm = TRUE,
+  maxRank = 1500,
   BPPARAM = SnowParam(),
   cores = 4,
   verbose = TRUE,
-  sc.keep=TRUE,
+  sc.keep = TRUE,
   ...
 )
 }
@@ -51,16 +52,18 @@ By default, kcdf="Poisson"}
 \item{mx.diff}{Offers two approaches to calculate the enrichment
 statistic (ES) from the KS random walk statistic.}
 
-\item{ssgsea.norm}{Logical, set to TRUE (default) with method="ssgsea"
+\item{ssgsea.norm}{Logical, set to FALSE (default) since we used batch methods with method="ssgsea"
 runs the SSGSEA method}
 
 \item{useTerm}{use Term or use id (default: TRUE)}
 
+\item{maxRank}{Maximum number of genes to rank per cell (UCell method only). Default: 1500}
+
 \item{cores}{The number of cores to use for parallelization.}
 
-\item{sc.keep}{keep the whole single cell data or not. Default: TRUE.}
-
 \item{verbose}{Gives information about each calculation step. Default: FALSE.}
+
+\item{sc.keep}{keep the whole single cell data or not. Default: TRUE}
 }
 \description{
 GSVA function for single cell data or data.frame with expression value

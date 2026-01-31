@@ -4,7 +4,12 @@
 \alias{buildMSIGDB}
 \title{Download database from Msigdb and prepare for enrichment analysis}
 \usage{
-buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
+buildMSIGDB(
+  species = "human",
+  keytype = "SYMBOL",
+  anntype = "GO",
+  msigdb_data = NULL
+)
 }
 \arguments{
 \item{species}{the species for query}
@@ -13,6 +18,10 @@ buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
 
 \item{anntype}{anntotaion type of  gene set (GO,BP,CC,MF,KEGG,REACTOME,
 BIOCARTA,HALLMARK)}
+
+\item{msigdb_data}{Optional: pre-loaded msigdbr data frame. Use this if you
+cannot connect to Zenodo (e.g., in China). You can download the data manually
+and load it with readRDS(), then pass it to this parameter.}
 }
 \description{
 Download database from Msigdb and prepare for enrichment analysis
@@ -20,6 +29,13 @@ Download database from Msigdb and prepare for enrichment analysis
 \examples{
 \dontrun{
 hsamsi<-buildMSIGDB(species = "human", keytype = "SYMBOL", anntype = "GO")
+
+# If you cannot connect to Zenodo, download the file manually:
+# 1. Download from: https://zenodo.org/records/15800824/files/msigdb.2025.1.Hs.rds
+# 2. Load and use:
+# msig_data <- readRDS("msigdb.2025.1.Hs.rds")
+# hallmark <- buildMSIGDB(species = "human", keytype = "SYMBOL",
+#                         anntype = "HALLMARK", msigdb_data = msig_data)
 }
 }
 \author{
