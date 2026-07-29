@@ -8,8 +8,9 @@ _scGSVA_ provides wrapper functions to perform GSVA, ssGSEA, PLAGE, z-score, and
 
 ### Key Features
 
-- **Multiple enrichment methods**: ssGSEA, GSVA, PLAGE, z-score, and UCell scoring
+- **Multiple enrichment methods**: ssGSEA, GSVA, PLAGE, z-score, UCell, and **PLAID** scoring
 - **C++ optimized**: Custom Rcpp implementation with up to 200x speedup over the original GSVA package
+- **PLAID algorithm**: Ultrafast Pathway Level Average Intensity Detection using sparse matrix computation
 - **Parallel computing**: BiocParallel-based chunk parallelization for large datasets
 - **Flexible annotation building**: Support for KEGG, GO, and MSigDB gene sets across 20+ species
 - **Batch processing**: Efficient handling of large datasets with chunked computation
@@ -44,6 +45,9 @@ res <- scgsva(pbmcs, hsko, method = "ssgsea")
 res <- scgsva(pbmcs, hsko, method = "gsva")
 res <- scgsva(pbmcs, hsko, method = "plage")
 res <- scgsva(pbmcs, hsko, method = "zscore")
+
+# PLAID: Ultrafast using sparse matrix computation (Zito et al., 2025)
+res <- scgsva(pbmcs, hsko, method = "plaid")
 
 # Or use UCell (maxRank is auto-adjusted to fit gene set sizes)
 res <- scgsva(pbmcs, hsko, method = "UCell")
@@ -228,7 +232,7 @@ res_orig <- scgsva(pbmcs, hsko, method = "ssgsea", use.original = TRUE)
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `method` | Enrichment method: `"ssgsea"`, `"gsva"`, `"plage"`, `"zscore"`, `"UCell"` | `"ssgsea"` |
+| `method` | Enrichment method: `"ssgsea"`, `"gsva"`, `"plage"`, `"zscore"`, `"UCell"`, `"plaid"` | `"ssgsea"` |
 | `kcdf` | Kernel for CDF estimation (GSVA method): `"Poisson"` or `"Gaussian"` | `"Poisson"` |
 | `mx.diff` | GSVA scoring: `TRUE` for max-min, `FALSE` for max deviation | `TRUE` |
 | `abs.ranking` | Flag used with `mx.diff=TRUE` | `FALSE` |
@@ -250,6 +254,7 @@ For questions or issues, please contact guokai8@gmail.com or open an issue at ht
 
 ## Recent Updates
 
+- **Added PLAID method**: Ultrafast Pathway Level Average Intensity Detection using sparse matrix computation (PLAID, Zito et al., Bioinformatics 2025)
 - **Custom C++ implementation**: Built-in Rcpp-optimized ssGSEA, GSVA, PLAGE, z-score (up to 200x faster)
 - **BiocParallel support**: Parallel kernel CDF computation for GSVA method on large datasets
 - **`use.original` parameter**: Switch between custom C++ and original GSVA package for validation

@@ -222,11 +222,33 @@ res_ucell <- scgsva(pbmcs, hsko, method = "UCell")
 res_ucell <- scgsva(pbmcs, hsko, method = "UCell", maxRank = 3000)
 ```
 
-### 2.6 Key Parameters
+### 2.6 PLAID Method
+
+PLAID (Pathway Level Average Intensity Detection) is an ultrafast gene set enrichment 
+method using sparse matrix computation. It computes the average intensity of genes 
+in each gene set for every sample. Reference: Zito et al., Bioinformatics 2025.
+
+**Key advantages:**
+- Very fast due to sparse matrix operations
+- Memory efficient for large datasets
+- Comparable accuracy to established methods
+
+**Note:** PLAID works best with log-transformed expression data (e.g., Seurat 
+normalized counts or log-transformed values).
+
+```{r plaid}
+# PLAID: Ultrafast sparse matrix method
+res_plaid <- scgsva(pbmcs, hsko, method = "plaid")
+
+# View results
+head(res_plaid@gsva[, 1:5])
+```
+
+### 2.7 Key Parameters
 
 | Parameter | Description | Default |
 |-----------|-------------|----------|
-| `method` | Enrichment method | `"ssgsea"` |
+| `method` | Enrichment method: `"ssgsea"`, `"gsva"`, `"plage"`, `"zscore"`, `"UCell"`, `"plaid"` | `"ssgsea"` |
 | `kcdf` | Kernel for CDF (GSVA): `"Poisson"` or `"Gaussian"` | `"Poisson"` |
 | `mx.diff` | GSVA scoring: max-min (`TRUE`) or max deviation (`FALSE`) | `TRUE` |
 | `abs.ranking` | Absolute ranking flag (with `mx.diff=TRUE`) | `FALSE` |

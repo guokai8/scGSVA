@@ -6,7 +6,7 @@
 #' @param slot Specific assay data to get or set.
 #' @param batch Chunk size for batch processing of large datasets. Default: 1000
 #' @param method Enrichment method: \code{"ssgsea"} (default), \code{"gsva"},
-#' \code{"plage"}, \code{"zscore"}, or \code{"UCell"}.
+#' \code{"plage"}, \code{"zscore"}, \code{"UCell"}, or \code{"plaid"}.
 #' @param kcdf Character string denoting the kernel to use during the
 #' non-parametric estimation of the cumulative distribution function of
 #' expression levels across samples when method="gsva".
@@ -58,7 +58,7 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                    verbose=TRUE,
                    sc.keep=TRUE,
                    use.original=FALSE,...) {
-    tau=switch(method, gsva=1, ssgsea=0.25, NA)
+    tau=switch(method, gsva=1, ssgsea=0.25, plaid=NA, NA)
     chk_limit <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
     if (nzchar(chk_limit)) {
         cores <- min(cores, 2L)
@@ -186,6 +186,10 @@ scgsva <- function(obj, annot = NULL, assay = NULL, slot = "counts",
                             BPPARAM = bpparam)
     } else if (method == "plage") {
         out <- .plage_custom(input, annotation,
+                             min.sz = min.sz, max.sz = max.sz)
+    } else if (method == "plaid") {
+        out <- .plaid_custom(input, annotation,
+                             normalize = TRUE,
                              min.sz = min.sz, max.sz = max.sz)
     } else {
         out <- .zscore_custom(input, annotation,

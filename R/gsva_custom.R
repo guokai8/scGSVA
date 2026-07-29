@@ -220,3 +220,85 @@
 
     return(es_matrix)
 }
+
+# ===========================================================================
+# PLAID: Pathway Level Average Intensity Detection
+# Reference: Zito et al., Bioinformatics 2025
+#
+# For each sample, PLAID computes the gene set score as the average
+# intensity of the genes in the gene set, using sparse matrix computation.
+#
+# Algorithm:
+#   1. Build sparse gene set matrix G (features x gene sets)
+#   2. Normalize G columns to sum to 1 (with 1e-8 offset to prevent zeros)
+#   3. Score = G' %*% X (sparse matrix cross-product)
+#   4. Optional median normalization
+# ===========================================================================
+.plaid_custom <- function(expr, gene_sets, normalize = TRUE,
+                         min.sz = 1, max.sz = Inf) {
+    gene_sets <- .filter_gene_sets(expr, gene_sets, min.sz, max.sz)
+    if (length(gene_sets) == 0) stop("No gene sets passed the size filter")
+
+    gene_names <- rownames(expr)
+    n_genes <- nrow(expr)
+    n_samples <- ncol(expr)
+    n_sets <- length(gene_sets)
+
+    # Build sparse gene set indicator matrix G (genes x gene sets)
+    # G[i,j] = 1 if gene i is in gene set j, else 0
+    i_list <- list()
+    j_list <- list()
+    for (j in seq_len(n_sets)) {
+        genes_in_set <- gene_sets[[j]]
+        gene_indices <- which(gene_names %in% genes_in_set)
+        if (length(gene_indices) > 0) {
+            i_list[[j]] <- gene_indices
+            j_list[[j]] <- rep(j, length(gene_indices))
+        }
+    }
+
+    i_vec <- unlist(i_list)
+    j_vec <- unlist(j_list)
+    x_vec <- rep(1, length(i_vec))
+
+    G <- Matrix::sparseMatrix(i = i_vec, j = j_vec, x = x_vec,
+                              dims = c(n_genes, n_sets),
+                              giveCsparse = TRUE)
+    rownames(G) <- gene_names
+    colnames(G) <- names(gene_sets)
+
+    # Column sums (gene set sizes)
+    col_sums <- Matrix::colSums(G)
+
+    # Scale G columns to sum to 1 (with 1e-8 offset)
+    # This prevents division by zero and ensures stable normalization
+    G_scaled <- Matrix::t(Matrix::t(G) / (col_sums + 1e-8))
+
+    # Compute PLAID scores: G' %*% X
+    # Result: gene sets (rows) x samples (columns)
+    if (is.null(dim(expr)) || length(dim(expr)) == 1) {
+        expr <- as.matrix(expr)
+    }
+
+    # Convert expression to sparse matrix if not already
+    if (!inherits(expr, "sparseMatrix") && !inherits(expr, "Matrix")) {
+        X <- Matrix::Matrix(expr, sparse = TRUE)
+    } else {
+        X <- expr
+    }
+
+    # Sparse matrix cross-product: G' %*% X
+    scores <- Matrix::crossprod(G_scaled, X)
+    scores <- as.matrix(scores)
+
+    rownames(scores) <- names(gene_sets)
+    colnames(scores) <- colnames(expr)
+
+    # Median normalization across samples (default in PLAID)
+    if (normalize) {
+        row_medians <- apply(scores, 1, median, na.rm = TRUE)
+        scores <- scores - row_medians
+    }
+
+    return(scores)
+}
