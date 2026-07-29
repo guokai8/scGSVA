@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^GSVA$
+^manuscript$
+^results$
+^LICENSE$
+^pygsva$
+^scripts$
+^CLAUDE\.md$
+^dot\.png$
+^feature\.png$
+^heat\.jpg$
+^ridge\.jpg$
+^vln\.jpg$

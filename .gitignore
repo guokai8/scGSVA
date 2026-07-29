@@ -1,0 +1,27 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# macOS
+.DS_Store
+
+# Compiled objects
+src/*.o
+src/*.so
+src/*.dll
+src/*.dylib
+src/*.a
+
+# R build artifacts
+*.tar.gz
+inst/doc/
+
+# Generated outputs
+results/
+backup/
+
+# External checkouts
+GSVA/
+
+# R CMD check outputs
+*.Rcheck/

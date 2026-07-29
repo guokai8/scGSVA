@@ -1,0 +1,61 @@
+Package: scGSVA
+Type: Package
+Title: GSVA and UCell signature enrichment analysis for single cell RNA seq
+Version: 0.0.27
+Authors@R: c(person("Kai","Guo",email = "guokai8@gmail.com",
+           role = c("aut", "cre")
+          ),
+          person("Zhihan","Wang",role = "aut"))
+Maintainer: Kai Guo <guokai8@gmail.com>
+Description: Provides wrapper functions to perform GSVA, ssGSEA, PLAGE,
+    z-score and UCell enrichment analysis for single-cell RNA-seq data.
+    Includes a custom C++ optimized implementation of all four GSVA scoring
+    methods that produces identical results to the original GSVA Bioconductor
+    package but runs significantly faster (up to 200x). Also includes
+    functions to build gene set annotations for multiple species (KEGG, GO,
+    Reactome, MSigDB) and generate publication-ready visualizations including
+    violin plots, dot plots, ridge plots, heatmaps, and spatial plots.
+License: GPL-3
+URL: https://github.com/guokai8/scGSVA
+BugReports: https://github.com/guokai8/scGSVA/issues
+Depends: R (>= 3.5.0), methods
+Imports:
+    dplyr,
+    magrittr,
+    rlang,
+    scales,
+    ggplot2,
+    tidyr,
+    Seurat,
+    SingleCellExperiment,
+    msigdbr,
+    KEGGREST,
+    Matrix,
+    BiocParallel,
+    SummarizedExperiment,
+    ggrepel,
+    BiocManager,
+    GO.db,
+    ggridges,
+    limma,
+    pheatmap,
+    AnnotationDbi,
+    viridis,
+    rstatix,
+    Rcpp
+LinkingTo: Rcpp
+Suggests:
+    AUCell,
+    devtools,
+    GSVA,
+    knitr,
+    rmarkdown,
+    singscore,
+    UCell
+VignetteBuilder: knitr
+Encoding: UTF-8
+LazyData: yes
+LazyDataCompression: xz
+RoxygenNote: 7.3.3
+biocViews:
+Date: 2025-03-01
