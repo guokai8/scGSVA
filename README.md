@@ -51,6 +51,9 @@ res <- scgsva(pbmcs, hsko, method = "plaid")
 
 # Or use UCell (maxRank is auto-adjusted to fit gene set sizes)
 res <- scgsva(pbmcs, hsko, method = "UCell")
+
+# as for GO
+# set useTerm = FALSE
 ```
 
 ## Visualization
